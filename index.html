@@ -1200,113 +1200,80 @@ const Scroll = {
 };
 
 /* ==========================================================================
-   The object — an open 3D ensō, raymarched in a fragment shader.
-   Its arc *is* the progress of the song: it draws itself closed as it plays.
+   The object — an ensō made of dust. Thousands of particles follow one brush
+   stroke; the song paints them as it plays, and the circle closes at the end.
    ========================================================================== */
-const FRAG = `
-precision highp float;
-uniform vec2 uRes; uniform float uTime; uniform vec2 uOff; uniform float uScale;
-uniform vec3 uRot; uniform float uArc; uniform vec3 uW; uniform vec4 uAud; uniform vec3 uMouse; uniform float uAlpha;
+const DUST_VERT = `
+attribute vec4 aP;      // u along the stroke, radial spread, depth spread, size/brightness
+attribute float aPh;    // phase
+uniform vec2 uRes; uniform vec2 uC; uniform float uR; uniform float uArc; uniform float uProg;
+uniform float uTime; uniform vec3 uW; uniform vec4 uAud; uniform float uBeat;
+uniform vec2 uRot; uniform vec3 uMouse; uniform float uPx; uniform float uAlpha;
+varying vec4 vCol;
 const vec3 CLAY = vec3(0.886, 0.271, 0.173);
-const vec3 BLUE = vec3(0.145, 0.192, 0.812);
-const vec3 BONE = vec3(0.945, 0.925, 0.89);
-uniform float uProg;
-vec2 r2(vec2 v, float a) { float c = cos(a), s = sin(a); return vec2(c * v.x - s * v.y, s * v.x + c * v.y); }
-vec3 toObj(vec3 p) {
-  p.xz = r2(p.xz, -uRot.y);
-  p.yz = r2(p.yz, -uRot.x);
-  p.xy = r2(p.xy, uRot.z);
-  return p;
-}
-float scene(vec3 pw) {
-  vec3 p = toObj(pw);
-  float an = uArc, ra = 1.0;
-  float th = atan(p.x, p.y);
-  float u = clamp((th + an) / (2.0 * an + 1e-4), 0.0, 1.0);
-  float rb = 0.19 * (1.22 - 0.62 * pow(u, 1.3)) * (1.0 + uAud.w * 0.45);
-  vec2 sc = vec2(sin(an), cos(an));
-  vec3 q = vec3(abs(p.x), p.y, p.z);
-  float k = (sc.y * q.x > sc.x * q.y) ? dot(q.xy, sc) : length(q.xy);
-  float d = sqrt(max(dot(q, q) + ra * ra - 2.0 * ra * k, 0.0)) - rb;
-  float t = uTime;
-  float ph = atan(p.z, length(p.xy) - ra);
-  float clay = sin(p.x * 2.1 + t * 0.55) * sin(p.y * 2.4 - t * 0.45) * sin(p.z * 3.1 + t * 0.35 + p.x) * (0.05 + uAud.x * 0.2);
-  float ink = sin(th * 6.0 - t * 1.4 + ph * 2.0) * (0.018 + uAud.y * 0.09) + sin(th * 17.0 + t * 3.0) * uAud.z * 0.03;
-  float milk = sin(th * 30.0 - t * 2.2) * (0.006 + uAud.z * 0.035 + uAud.w * 0.02) + sin(ph * 2.0 + t * 0.8) * 0.018;
-  d -= clay * uW.x + ink * uW.y + milk * uW.z;
-  vec3 dm = pw - vec3(uMouse.xy * 2.0, 0.25);
-  d -= uMouse.z * 0.16 * exp(-dot(dm, dm) * 2.5);
-  return d;
-}
+const vec3 INKD = vec3(0.086, 0.078, 0.071);
+const vec3 BONE = vec3(0.93, 0.9, 0.86);
+const vec3 GRAY = vec3(0.55, 0.52, 0.48);
+const vec3 SKY = vec3(0.52, 0.6, 1.0);
 void main() {
-  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
-  uv = (uv - uOff) / uScale;
-  vec3 ro = vec3(0.0, 0.0, 3.2), rd = normalize(vec3(uv, -1.6));
-  float b = dot(ro, rd), h = b * b - (dot(ro, ro) - 2.6);
-  if (h < 0.0) { gl_FragColor = vec4(0.0); return; }
-  h = sqrt(h);
-  float t = max(-b - h, 0.0), tmax = -b + h, md = 1e3, tm = t;
-  bool hit = false;
-  for (int i = 0; i < 90; i++) {
-    float d = scene(ro + rd * t);
-    if (d < md) { md = d; tm = t; }
-    if (d < 0.0012) { hit = true; break; }
-    t += d * 0.62;
-    if (t > tmax) break;
-  }
-  float ew = 3.0 / (uRes.y * uScale);
-  if (!hit && md > ew) { gl_FragColor = vec4(0.0); return; }
-  if (!hit) t = tm;
-  vec3 col; float a;
-  {
-    vec3 p = ro + rd * t;
-    vec3 po = toObj(p);
-    float u = clamp((atan(po.x, po.y) + uArc) / (2.0 * uArc + 1e-4), 0.0, 1.0);
-    float painted = 1.0 - smoothstep(uProg - 0.004, uProg + 0.004, u);
-    vec2 e = vec2(1.0, -1.0) * 0.002;
-    vec3 n = normalize(e.xyy * scene(p + e.xyy) + e.yyx * scene(p + e.yyx) + e.yxy * scene(p + e.yxy) + e.xxx * scene(p + e.xxx));
-    vec3 v = -rd, L = normalize(vec3(-0.55, 0.75, 0.65));
-    float ndl = dot(n, L);
-    float wrap = clamp((ndl + 0.5) / 1.5, 0.0, 1.0);
-    float spec = pow(max(dot(n, normalize(L + v)), 0.0), 60.0);
-    float fre = pow(1.0 - max(dot(n, v), 0.0), 3.0);
-    vec3 r = reflect(rd, n);
-    float ao = 0.78 + 0.22 * clamp(0.5 + 0.5 * n.y, 0.0, 1.0);
-    vec3 clay = CLAY * (0.3 + 0.85 * wrap) * ao + vec3(1.0, 0.86, 0.76) * spec * 0.18 + fre * vec3(1.0, 0.72, 0.62) * 0.2;
-    float sky = smoothstep(-0.1, 0.8, r.y);
-    float box = smoothstep(0.5, 0.6, r.y) * smoothstep(0.95, 0.45, abs(r.x));
-    vec3 env = mix(vec3(0.015), vec3(0.3, 0.28, 0.26), sky) + box * vec3(1.0, 0.95, 0.9) * 1.1
-             + CLAY * smoothstep(0.55, 0.95, -r.x) * smoothstep(-0.3, 0.2, r.y) * 0.7;
-    vec3 ink = mix(vec3(0.012), env, 0.06 + 0.94 * fre) + env * 0.1 + spec * 1.3;
-    vec3 milk = mix(BLUE * 0.55 + 0.12, BONE, wrap) + spec * 0.35 + fre * BONE * 0.25;
-    // the part of the circle the song hasn't reached yet
-    vec3 clayU = vec3(0.9, 0.87, 0.82) * (0.5 + 0.55 * wrap) + spec * 0.12 + fre * 0.08;
-    vec3 inkU = vec3(0.11, 0.105, 0.1) * (0.45 + 0.8 * wrap) + fre * vec3(0.25, 0.23, 0.21) + spec * 0.15;
-    vec3 milkU = mix(BLUE * 0.8, BLUE * 1.25 + 0.06, wrap) + fre * 0.18 + spec * 0.2;
-    clay = mix(clayU, clay, painted); ink = mix(inkU, ink, painted); milk = mix(milkU, milk, painted);
-    col = clay * uW.x + ink * uW.y + milk * uW.z;
-    a = hit ? 1.0 : 1.0 - smoothstep(0.0, ew, md);
-  }
-  float g = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233)) + uTime * 7.0) * 43758.5453);
-  col += (g - 0.5) * 0.04;
-  a *= uAlpha;
-  gl_FragColor = vec4(col * a, a);
+  float u = aP.x, a = aP.y, b = aP.z, z = aP.w, t = uTime;
+  float th = u * uArc * 6.28318;
+  float w = (1.15 - 0.8 * pow(u, 1.2)) * uR * 0.16 * (1.0 + uAud.w * 1.1);
+  float scat = 1.0 + uBeat * 0.7 * z + uAud.x * 0.6;
+  // each state moves differently: clay drifts like sand, ink glitters and swirls, milk folds into pleats
+  float grain = sin(aPh * 3.0 + t * 0.4) * 0.12 * uW.x;
+  float swirl = sin(t * 0.6 + aPh + u * 12.0) * uW.y;
+  float pleat = sin(u * 46.0 - t * 2.4) * (0.1 + uAud.z * 0.55) * uW.z;
+  float rad = uR + (a * scat + pleat + grain) * w;
+  vec3 p = vec3(sin(th) * rad, cos(th) * rad, b * w * 0.9);
+  p.xy += vec2(cos(aPh + t * (0.7 + uW.y)), sin(aPh * 1.3 + t * 0.8)) * (uAud.w * 14.0 * z + swirl * 2.5) * uPx;
+  float cx = cos(uRot.x), sx = sin(uRot.x), cy = cos(uRot.y), sy = sin(uRot.y);
+  p = vec3(p.x, p.y * cx - p.z * sx, p.y * sx + p.z * cx);
+  p = vec3(p.x * cy + p.z * sy, p.y, -p.x * sy + p.z * cy);
+  float persp = 1.0 / (1.0 - p.z / (uR * 5.0));
+  vec2 pix = uC + vec2(p.x, -p.y) * persp;
+  vec2 dm = pix - uMouse.xy;
+  float dl = length(dm), mr = uR * 0.45;
+  if (dl < mr) pix += dm / (dl + 0.001) * pow(1.0 - dl / mr, 2.0) * mr * 0.5 * uMouse.z;
+  gl_Position = vec4(pix.x / uRes.x * 2.0 - 1.0, 1.0 - pix.y / uRes.y * 2.0, 0.0, 1.0);
+  float played = step(u, uProg);
+  vec3 cP = CLAY * uW.x + BONE * (uW.y + uW.z);
+  vec3 cU = INKD * uW.x + GRAY * uW.y + SKY * uW.z;
+  float twinkle = mix(1.0, 0.65 + 0.35 * sin(t * 4.0 + aPh * 7.0), uW.y);
+  vCol = vec4(mix(cU, cP, played), (0.35 + 0.65 * z) * mix(0.5 + 0.25 * uW.y, 1.0, played) * twinkle * uAlpha);
+  gl_PointSize = (1.3 + z * 1.9) * uPx * persp * (1.0 + uAud.w * 0.4);
 }`;
-const VERT = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }';
+const DUST_FRAG = `
+precision mediump float;
+varying vec4 vCol;
+void main() {
+  float a = vCol.a * smoothstep(0.5, 0.22, length(gl_PointCoord - 0.5));
+  gl_FragColor = vec4(vCol.rgb * a, a);
+}`;
 
 const Orb = {
   target: POSES.desk.hero, pose: [.3, .02, .82], arc: 0, prog: 1, introOn: false, intro: 0,
-  w: [1, 0, 0], spinX: 0, spinY: 0, vx: 0, vy: 0, drag: null, mouse: 0, q: 1, slow: 0, roll: 0,
+  w: [1, 0, 0], spinX: 0, spinY: 0, vx: 0, vy: 0, drag: null, mouse: 0, q: 1, slow: 0,
   init() {
     this.cv = $('#gl');
+    this.count = mqFine.matches ? 16000 : 9000;
+    this.data = this.makeDust(this.count);
     const gl = this.cv.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' });
     if (gl) this.gl = this.setupGL(gl);
-    if (!this.gl) this.ctx2d = this.cv.getContext('2d');
-    this.q = mqFine.matches ? .8 : .55;
+    if (!this.gl) { this.ctx2d = this.cv.getContext('2d'); this.count = Math.min(this.count, 5000); }
     this.resize();
     addEventListener('resize', () => this.resize());
     this.initDrag();
     Ticker.add((dt, t) => this.frame(dt, t));
+  },
+  /* u (biased toward the heavy start of the stroke), radial + depth spread, size, phase */
+  makeDust(n) {
+    const d = new Float32Array(n * 5);
+    const g = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+    for (let i = 0; i < n; i++) {
+      d.set([Math.pow(Math.random(), 1.2), g(), g(), Math.random(), Math.random() * TAU], i * 5);
+    }
+    return d;
   },
   setupGL(gl) {
     const sh = (type, src) => {
@@ -1314,31 +1281,35 @@ const Orb = {
       if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
       return s;
     };
-    const vs = sh(gl.VERTEX_SHADER, VERT), fs = sh(gl.FRAGMENT_SHADER, FRAG);
+    const vs = sh(gl.VERTEX_SHADER, DUST_VERT), fs = sh(gl.FRAGMENT_SHADER, DUST_FRAG);
     if (!vs || !fs) return null;
     const pr = gl.createProgram();
     gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(pr)); return null; }
     gl.useProgram(pr);
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(pr, 'p');
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, this.data, gl.STATIC_DRAW);
+    const aP = gl.getAttribLocation(pr, 'aP'), aPh = gl.getAttribLocation(pr, 'aPh');
+    gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 4, gl.FLOAT, false, 20, 0);
+    gl.enableVertexAttribArray(aPh); gl.vertexAttribPointer(aPh, 1, gl.FLOAT, false, 20, 16);
     this.u = {};
-    ['uRes', 'uTime', 'uOff', 'uScale', 'uRot', 'uArc', 'uW', 'uAud', 'uMouse', 'uAlpha', 'uProg'].forEach(n => { this.u[n] = gl.getUniformLocation(pr, n); });
+    ['uRes', 'uC', 'uR', 'uArc', 'uProg', 'uTime', 'uW', 'uAud', 'uBeat', 'uRot', 'uMouse', 'uPx', 'uAlpha'].forEach(n => { this.u[n] = gl.getUniformLocation(pr, n); });
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
-    this.cv.addEventListener('webglcontextlost', e => { e.preventDefault(); this.lost = true; });
-    this.cv.addEventListener('webglcontextrestored', () => { this.lost = false; this.gl = this.setupGL(gl); });
+    if (!this._ctxEvents) {
+      this._ctxEvents = true;
+      this.cv.addEventListener('webglcontextlost', e => { e.preventDefault(); this.lost = true; });
+      this.cv.addEventListener('webglcontextrestored', () => { this.lost = false; this.gl = this.setupGL(gl); });
+    }
     return gl;
   },
   resize() {
-    const dpr = Math.min(1.5, devicePixelRatio || 1) * this.q;
+    const dpr = Math.min(2, devicePixelRatio || 1) * this.q;
     this.cv.width = Math.max(2, Math.round(innerWidth * dpr));
     this.cv.height = Math.max(2, Math.round(innerHeight * dpr));
   },
-  /* screen-space circle of the object (CSS px) */
+  /* screen-space circle of the object (CSS px) — also the play/scrub hit area */
   get screen() {
     const H = innerHeight;
     return { x: innerWidth / 2 + this.pose[0] * H, y: H / 2 - this.pose[1] * H, r: .62 * this.pose[2] * H * this.introScale };
@@ -1350,7 +1321,7 @@ const Orb = {
       if (e.target.closest('a, button')) return;
       const s = this.screen;
       if (Math.hypot(e.clientX - s.x, e.clientY - s.y) > s.r * 1.25) return;
-      this.drag = { x: e.clientX, y: e.clientY, id: e.pointerId, t: performance.now() };
+      this.drag = { x: e.clientX, y: e.clientY, id: e.pointerId };
       if (e.pointerType === 'mouse') hero.setPointerCapture(e.pointerId);
     });
     hero.addEventListener('pointermove', e => {
@@ -1368,7 +1339,7 @@ const Orb = {
     for (let k = 0; k < 3; k++) this.pose[k] = damp(this.pose[k], this.target[k], 4.5, dt);
     const sw = STATES[Theme.state].w;
     for (let k = 0; k < 3; k++) this.w[k] = damp(this.w[k], sw[k], 3.2, dt);
-    // an ensō that is painted along its stroke as the song plays, and closes as it ends
+    // the song paints the stroke as it plays; the circle closes at the very end
     const scrub = States.scrubRatio;
     const begun = Engine.begun || scrub != null;
     const ratio = scrub != null ? scrub : Engine.ratio;
@@ -1382,60 +1353,56 @@ const Orb = {
       this.spinY = damp(this.spinY, Math.round(this.spinY / TAU) * TAU, 1.4, dt);
       this.spinX = damp(this.spinX, Math.round(this.spinX / TAU) * TAU, 1.4, dt);
     }
-    const calm = Scroll.active === 'tracks' ? .25 : 1;
+    const calm = Scroll.active === 'tracks' ? .3 : 1;
     const px = (Pointer.sx / innerWidth - .5), py = (Pointer.sy / innerHeight - .5);
-    const rx = (.22 + py * .35) * calm + this.spinX + Math.sin(t * .4) * .05 * calm;
-    const ry = (-.3 + px * .5) * calm + this.spinY + Math.sin(t * .3) * .12 * calm;
+    const rx = (.18 + py * .3) * calm + this.spinX + Math.sin(t * .4) * .05 * calm;
+    const ry = (-.22 + px * .45) * calm + this.spinY + Math.sin(t * .3) * .1 * calm;
     this.mouse = damp(this.mouse, Pointer.active && mqFine.matches ? 1 : 0, 4, dt);
-    const s = this.screen;
     const alpha = smooth(clamp(this.intro * 3));
-
-    if (this.gl && !this.lost) this.drawGL(dt, t, rx, ry, alpha);
-    else if (this.ctx2d) this.draw2D(t, s, alpha);
-
-    // adaptive quality — keep it smooth on slower GPUs
+    if (this.gl && !this.lost) this.drawGL(t, rx, ry, alpha);
+    else if (this.ctx2d) this.draw2D(t, rx, ry, alpha);
+    // adaptive quality — keep it smooth on slower devices
     this.slow = damp(this.slow, dt > 1 / 38 ? 1 : 0, 1, dt);
-    if (this.slow > .8 && this.q > .42 && t > 4) { this.q *= .82; this.slow = 0; this.resize(); }
+    if (this.slow > .8 && this.q > .5 && t > 4) { this.q *= .8; this.slow = 0; this.resize(); }
   },
-  drawGL(dt, t, rx, ry, alpha) {
-    const gl = this.gl, u = this.u, W = this.cv.width, H = this.cv.height;
+  drawGL(t, rx, ry, alpha) {
+    const gl = this.gl, u = this.u, W = this.cv.width, H = this.cv.height, k = W / innerWidth, s = this.screen;
     gl.viewport(0, 0, W, H);
-    if (alpha <= 0) { gl.clear(gl.COLOR_BUFFER_BIT); return; }
-    const sc = this.pose[2] * this.introScale;
-    const an = Math.PI * this.arc;
-    const mxu = ((Pointer.sx - innerWidth / 2) / innerHeight - this.pose[0]) / sc;
-    const myu = (-(Pointer.sy - innerHeight / 2) / innerHeight - this.pose[1]) / sc;
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    if (alpha <= 0) return;
     gl.uniform2f(u.uRes, W, H);
+    gl.uniform2f(u.uC, s.x * k, s.y * k);
+    gl.uniform1f(u.uR, s.r * .8 * k);
+    gl.uniform1f(u.uArc, Math.max(.02, this.arc));
+    gl.uniform1f(u.uProg, this.prog);
     gl.uniform1f(u.uTime, t);
-    gl.uniform2f(u.uOff, this.pose[0], this.pose[1]);
-    gl.uniform1f(u.uScale, sc);
-    gl.uniform3f(u.uRot, rx, ry, an + Engine.beat * .04);
-    gl.uniform1f(u.uArc, Math.max(.02, an));
     gl.uniform3f(u.uW, this.w[0], this.w[1], this.w[2]);
     gl.uniform4f(u.uAud, Engine.bass, Engine.mid, Engine.high, Engine.level);
-    gl.uniform3f(u.uMouse, mxu, myu, this.mouse);
+    gl.uniform1f(u.uBeat, Engine.beat);
+    gl.uniform2f(u.uRot, rx, ry);
+    gl.uniform3f(u.uMouse, Pointer.sx * k, Pointer.sy * k, this.mouse);
+    gl.uniform1f(u.uPx, k * Math.max(.75, Math.min(1.15, this.pose[2] / .62)));
     gl.uniform1f(u.uAlpha, alpha);
-    gl.uniform1f(u.uProg, this.prog);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.drawArrays(gl.POINTS, 0, this.count);
   },
-  draw2D(t, s, alpha) {
-    const c = this.ctx2d, W = this.cv.width, H = this.cv.height, k = W / innerWidth;
+  /* fallback without WebGL: the same dust, fewer particles, flat */
+  draw2D(t, rx, ry, alpha) {
+    const c = this.ctx2d, W = this.cv.width, H = this.cv.height, k = W / innerWidth, s = this.screen, D = this.data;
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.clearRect(0, 0, W, H);
-    c.globalAlpha = alpha;
-    const col = this.w[0] > .5 ? '#E2452C' : this.w[1] > .5 ? '#2a2826' : '#F1ECE3';
-    c.lineCap = 'round';
-    c.strokeStyle = col;
-    c.lineWidth = s.r * k * (.24 + Engine.level * .1);
-    c.beginPath();
-    c.arc(s.x * k, s.y * k, s.r * k * .8, -Math.PI / 2, -Math.PI / 2 + TAU * Math.max(.02, this.arc));
-    c.stroke();
-    c.strokeStyle = this.w[1] > .5 ? '#E2452C' : '#161412';
-    c.lineWidth *= .3;
-    c.beginPath();
-    c.arc(s.x * k, s.y * k, s.r * k * .8, -Math.PI / 2, -Math.PI / 2 + TAU * this.arc * this.prog);
-    c.stroke();
-    c.globalAlpha = 1;
+    if (alpha <= 0) return;
+    const R = s.r * .8 * k, cx = s.x * k, cy = s.y * k, tilt = Math.cos(rx);
+    const played = this.w[0] > .5 ? '226,69,44' : '237,230,219';
+    const rest = this.w[0] > .5 ? '22,20,18' : this.w[1] > .5 ? '92,87,80' : '133,153,255';
+    for (let i = 0; i < this.count; i++) {
+      const u = D[i * 5], a = D[i * 5 + 1], z = D[i * 5 + 3];
+      const th = u * this.arc * TAU, w = (1.15 - .8 * Math.pow(u, 1.2)) * R * .16 * (1 + Engine.level * 1.1);
+      const r = R + a * w * (1 + Engine.beat * .7 * z);
+      const p = u <= this.prog;
+      c.fillStyle = `rgba(${p ? played : rest},${((.35 + .65 * z) * (p ? 1 : .5) * alpha).toFixed(3)})`;
+      const sz = (1.3 + z * 1.9) * k;
+      c.fillRect(cx + Math.sin(th) * r, cy - Math.cos(th) * r * tilt, sz, sz);
+    }
   },
 };
 
