@@ -635,7 +635,8 @@ body.menu-open .now { opacity: 0; }
    CONFIG
    --------------------------------------------------------------------------
    src    : the audio file(s) inside this repository — the first one that
-            exists is played (audio/track-1.mp3, .mp4 or .m4a).
+            exists is played (audio/track-1.m4a, .mp3 or .mp4).
+   cover  : artwork shown in the About section.
    songId : the Suno song UUID — fallback: streams from Suno's CDN if the
             local file is missing. Also used for the cover art.
    title  : set it to override the displayed name ('' = read from the MP3).
@@ -643,9 +644,9 @@ body.menu-open .now { opacity: 0; }
 const CONFIG = {
   sunoProfile: 'https://suno.com/@ensomusicrecords74?page=songs',
   tracks: [
-    { code: 'FlUHU56FcRSXQtcj', songId: '06ebbe47-8539-4eea-916f-7017b690b90d', title: '', src: ['audio/track-1.mp3', 'audio/track-1.mp4', 'audio/track-1.m4a'] },
-    { code: 'Rkw3YUjjzWxiJ3Lj', songId: '303f09a5-e35c-4722-827e-9b280a07504e', title: '', src: ['audio/track-2.mp3', 'audio/track-2.mp4', 'audio/track-2.m4a'] },
-    { code: 'Gcx2V4lbPDyMZvUh', songId: '80cf2f18-caf9-4f7a-a16a-2eab9a8f1e55', title: '', src: ['audio/track-3.mp3', 'audio/track-3.mp4', 'audio/track-3.m4a'] },
+    { code: 'FlUHU56FcRSXQtcj', songId: '06ebbe47-8539-4eea-916f-7017b690b90d', title: 'Life Is Stronger', cover: 'audio/cover-1.jpg', src: ['audio/track-1.m4a', 'audio/track-1.mp3', 'audio/track-1.mp4'] },
+    { code: 'Rkw3YUjjzWxiJ3Lj', songId: '303f09a5-e35c-4722-827e-9b280a07504e', title: 'Spring', cover: 'audio/cover-2.jpg', src: ['audio/track-2.m4a', 'audio/track-2.mp3', 'audio/track-2.mp4'] },
+    { code: 'Gcx2V4lbPDyMZvUh', songId: '80cf2f18-caf9-4f7a-a16a-2eab9a8f1e55', title: 'Lonly streets', cover: 'audio/cover-3.jpg', src: ['audio/track-3.m4a', 'audio/track-3.mp3', 'audio/track-3.mp4'] },
   ],
 };
 
@@ -832,7 +833,7 @@ const Engine = {
     Object.assign(t, { plainOnly: false, peaks: null, peaksKind: '', peaksTried: false, tagTried: false });
     return true;
   },
-  coverOf(t) { return t.coverBlob || (t.songId ? `https://cdn2.suno.ai/image_${t.songId}.jpeg` : ''); },
+  coverOf(t) { return t.coverBlob || t.cover || (t.songId ? `https://cdn2.suno.ai/image_${t.songId}.jpeg` : ''); },
   titleOf(t) { return t.title || t.metaTitle || `Track ${pad(t.i + 1)}`; },
   has(i) { const t = this.tracks[i]; return !!this.srcOf(t) && !t.failed; },
 
@@ -1599,7 +1600,6 @@ const About = {
         const img = new Image();
         img.alt = '';
         img.decoding = 'async';
-        img.loading = 'lazy';
         img.onload = () => $('.art__img', a).appendChild(img);
         img.src = url;
       }
