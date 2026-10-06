@@ -277,9 +277,9 @@ html.has-cursor .cursor { display: block; }
 .art.is-in .art__img { clip-path: inset(0 0 0 0); }
 .art__tile:nth-child(2) .art__img { transition-delay: .15s; }
 .art__tile:nth-child(3) .art__img { transition-delay: .3s; }
-.art__img img { position: absolute; inset: -6%; width: 112%; height: 112%; object-fit: cover; transition: transform 1.4s var(--e-out), filter .8s; filter: saturate(.92); }
-.art__tile:hover .art__img img { transform: scale(1.06) rotate(-1deg); filter: saturate(1.1); }
-.art__ph { position: absolute; inset: 0; display: grid; place-items: center; font: 400 clamp(60px, 9vw, 150px)/1 var(--f-s); font-style: italic; }
+.art__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); transition: transform 1.6s var(--e-out); }
+.art__tile:hover .art__img img { transform: scale(1.02); }
+.art__dust { position: absolute; inset: 0; width: 100%; height: 100%; }
 .art__cap { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 12px; }
 .art__cap b { font-weight: 600; }
 .art__cap .serif { font-size: 18px; }
@@ -1716,6 +1716,75 @@ const Hero = {
 /* ==========================================================================
    About — masked statement + artwork
    ========================================================================== */
+/* A tile's live poster: a small ensō of dust in its state's colours. Hover and the
+   dust is blown away from the pointer, revealing the real cover underneath. */
+class DustPoster {
+  constructor(tile, i) {
+    this.i = i; this.tile = tile; this.box = $('.art__img', tile);
+    this.cv = document.createElement('canvas');
+    this.cv.className = 'art__dust';
+    this.cv.setAttribute('aria-hidden', 'true');
+    this.box.appendChild(this.cv);
+    this.ctx = this.cv.getContext('2d');
+    this.fine = mqFine.matches;
+    this.r = this.fine ? 0 : 1; this.hover = false; this.hasImg = false;
+    this.mx = .5; this.my = .5; this.w = 1; this.h = 1; this.visible = false;
+    this.rot = [-.25, .9, 2.3][i];
+    this.col = [[224, 33, 122], [236, 230, 219], [241, 236, 227]][i];
+    this.bg = [[221, 212, 197], [14, 13, 12], [37, 49, 207]][i];
+    const g = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+    this.dust = Array.from({ length: this.fine ? 2400 : 1200 }, () => ({ u: Math.pow(Math.random(), 1.2), a: g(), z: Math.random(), ph: Math.random() * TAU, sx: Math.random() * 2 - 1, sy: Math.random() * 2 - 1 }));
+    const fit = () => {
+      const r = this.cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+      this.w = Math.max(1, r.width); this.h = Math.max(1, r.height);
+      this.cv.width = Math.round(this.w * dpr); this.cv.height = Math.round(this.h * dpr); this.dpr = dpr;
+    };
+    new ResizeObserver(fit).observe(this.cv);
+    new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; }).observe(this.cv);
+    fit();
+    tile.addEventListener('pointerenter', () => { this.hover = true; });
+    tile.addEventListener('pointerleave', () => { this.hover = false; });
+    tile.addEventListener('pointermove', e => {
+      const r = this.box.getBoundingClientRect();
+      this.mx = (e.clientX - r.left) / r.width; this.my = (e.clientY - r.top) / r.height;
+    });
+  }
+  frame(dt, t) {
+    if (!this.visible) return;
+    const want = this.fine ? (this.hover && this.hasImg ? 1 : 0) : (this.hasImg ? 1 : 0);
+    this.r = damp(this.r, want, this.hover ? 3.2 : 2.4, dt);
+    const { ctx: c, w, h, dpr, r } = this;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, w, h);
+    // the coloured ground fades away to show the cover
+    const ground = this.fine ? 1 - r : 0;
+    if (ground > .002) { c.fillStyle = rgba(this.bg, ground); c.fillRect(0, 0, w, h); }
+    const live = Engine.index === this.i && Engine.playing;
+    const lvl = live ? Engine.level : 0, beat = live ? Engine.beat : 0;
+    const R = Math.min(w, h) * .3 * (1 + lvl * .12), cx = w / 2, cy = h / 2;
+    const mx = this.mx * w, my = this.my * h, blow = this.fine ? r : 0;
+    const alpha = this.fine ? 1 - r * .85 : .55;
+    const col = this.fine ? this.col : [255, 255, 255];
+    for (const d of this.dust) {
+      const th = this.rot + d.u * .88 * TAU + Math.sin(t * .2 + this.i) * .1;
+      const wd = (1.15 - .8 * Math.pow(d.u, 1.2)) * R * .2 * (1 + beat * .8 * d.z);
+      const rr = R + d.a * wd + Math.sin(t * .8 + d.ph) * 1.5;
+      let x = cx + Math.sin(th) * rr, y = cy - Math.cos(th) * rr;
+      if (!this.fine) { x += Math.sin(t * .3 + d.ph) * 6; y += Math.cos(t * .25 + d.ph) * 6; }
+      if (blow > .001) { // blown outward from the pointer
+        const dx = x - mx, dy = y - my, dl = Math.hypot(dx, dy) || 1, k = blow * (40 + d.z * 160) * (1 + 120 / (dl + 40));
+        x += dx / dl * k + d.sx * blow * 30; y += dy / dl * k + d.sy * blow * 30;
+      } else if (this.fine && this.hover) {
+        const dx = x - mx, dy = y - my, dl = Math.hypot(dx, dy);
+        if (dl < 60) { x += dx / (dl || 1) * (60 - dl) * .6; y += dy / (dl || 1) * (60 - dl) * .6; }
+      }
+      const s = 1 + d.z * 1.6;
+      c.fillStyle = rgba(col, ((.35 + .65 * d.z) * alpha).toFixed(3));
+      c.fillRect(x, y, s, s);
+    }
+  }
+}
+
 const About = {
   init() {
     const p = $('#about-state');
@@ -1743,25 +1812,25 @@ const About = {
     this.build();
     io.observe(this.art);
     on('source', () => this.captions());
-    Ticker.add(() => this.frame());
+    Ticker.add((dt, t) => { this.frame(); this.posters.forEach(p => p.frame(dt, t)); });
   },
   build() {
+    this.posters = [];
     this.tiles = Engine.tracks.map((t, i) => {
       const a = document.createElement('a');
       a.className = 'art__tile';
       a.href = '#tracks';
       a.dataset.cursor = 'label';
       a.dataset.cursorLabel = 'play';
-      a.innerHTML = `<div class="art__img"><span class="art__ph" style="background:${['#E0217A', '#0E0D0C', '#2531CF'][i]};color:#F1ECE3">${ROMAN[i]}</span></div>
+      a.innerHTML = `<div class="art__img"><img alt="" decoding="async"></div>
         <div class="art__cap"><span><span class="serif">${ROMAN[i]}.</span> <b class="art__t"></b></span><span class="lab">${STATES[i].name}</span></div>`;
+      const poster = new DustPoster(a, i);
+      const img = $('img', a);
+      img.addEventListener('load', () => { poster.hasImg = true; });
+      img.addEventListener('error', () => { poster.hasImg = false; });
       const url = Engine.coverOf(t);
-      if (url) {
-        const img = new Image();
-        img.alt = '';
-        img.decoding = 'async';
-        img.onload = () => $('.art__img', a).appendChild(img);
-        img.src = url;
-      }
+      if (url) img.src = url;
+      this.posters.push(poster);
       a.addEventListener('click', e => {
         e.preventDefault();
         const r = a.getBoundingClientRect();
@@ -1779,7 +1848,7 @@ const About = {
       $('.art__t', a).textContent = Engine.titleOf(t);
       a.setAttribute('aria-label', `Play ${Engine.titleOf(t)} — state ${ROMAN[i]}, ${STATES[i].name}`);
       if (t.coverBlob) {
-        const img = $('img', a) || $('.art__img', a).appendChild(new Image());
+        const img = $('img', a);
         if (img.src !== t.coverBlob) img.src = t.coverBlob;
       }
     });
