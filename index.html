@@ -1,9 +1,2594 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <title>Miroslav</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Enso — AI Music Artist</title>
+<meta name="description" content="Enso — AI music artist. Three songs, three states of one open circle. Listen on Suno.">
+<meta name="theme-color" content="#E9E3D8">
+<meta property="og:title" content="Enso — AI Music Artist">
+<meta property="og:description" content="Three songs, three states of one open circle. Listen on Suno.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://miroslav300812-creator.github.io/musport/">
+<meta property="og:image" content="https://miroslav300812-creator.github.io/musport/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ENSO — a pink ensō of dust over oversized black type">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Enso — AI Music Artist">
+<meta name="twitter:description" content="Three songs, three states of one open circle.">
+<meta name="twitter:image" content="https://miroslav300812-creator.github.io/musport/og.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23E9E3D8'/%3E%3Cpath d='M41 14A20 20 0 1 1 27 13' fill='none' stroke='%23E0217A' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script>
+/* phone / tablet / desktop decided before first paint, so each gets its own layout */
+(function () {
+  var d = document.documentElement, w = innerWidth, h = innerHeight, s = Math.min(w, h);
+  var coarse = matchMedia('(pointer: coarse)').matches || !matchMedia('(hover: hover)').matches;
+  var k = (w <= 600 || (coarse && s < 600)) ? 'phone' : coarse ? 'tablet' : 'desk';
+  d.className += ' is-' + k + (h > w ? ' is-portrait' : ' is-landscape');
+})();
+</script>
+<noscript><style>body{overflow:auto!important}.loader{display:none!important}.cursor{display:none!important}[data-reveal],.mask>span{opacity:1!important;transform:none!important}</style></noscript>
+<style>
+/* ==========================================================================
+   ENSO — tokens. The whole site re-themes itself per musical state.
+   ========================================================================== */
+@property --bg { syntax: '<color>'; inherits: true; initial-value: #E9E3D8; }
+@property --fg { syntax: '<color>'; inherits: true; initial-value: #161412; }
+@property --accent { syntax: '<color>'; inherits: true; initial-value: #E0217A; }
+
+:root {
+  --bg: #E9E3D8;
+  --fg: #161412;
+  --accent: #E0217A;
+  --muted: color-mix(in srgb, var(--fg) 58%, transparent);
+  --hair: color-mix(in srgb, var(--fg) 16%, transparent);
+  --f-d: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --f-s: 'Instrument Serif', 'Times New Roman', Georgia, serif;
+  --e-out: cubic-bezier(.16, 1, .3, 1);
+  --e-io: cubic-bezier(.77, 0, .18, 1);
+  --e-back: cubic-bezier(.34, 1.4, .64, 1);
+  --g: clamp(18px, 2.6vw, 40px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  transition: --bg 1s var(--e-out), --fg 1s var(--e-out), --accent 1s var(--e-out);
+}
+:root.bg-instant { transition: --fg 1s var(--e-out), --accent 1s var(--e-out); }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+body {
+  margin: 0; min-height: 100vh; overflow-x: hidden;
+  background: transparent; color: var(--fg);
+  font: 500 14px/1.45 var(--f-d);
+  -webkit-font-smoothing: antialiased;
+}
+body.is-locked { overflow: hidden; }
+::selection { background: var(--accent); color: var(--bg); }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+img, canvas, svg { display: block; }
+h1, h2, h3, p { margin: 0; font-weight: inherit; }
+ul, ol { list-style: none; margin: 0; padding: 0; }
+:focus { outline: none; }
+:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 5px; border-radius: 2px; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) { html.has-cursor, html.has-cursor * { cursor: none !important; } }
+
+.lab { font: 500 12px/1.2 var(--f-d); letter-spacing: .01em; color: var(--muted); }
+.serif { font-family: var(--f-s); font-style: italic; font-weight: 400; letter-spacing: -.01em; }
+.skip { position: fixed; left: 12px; top: 12px; z-index: 200; padding: 10px 16px; border-radius: 99px; background: var(--fg); color: var(--bg); transform: translateY(-160%); transition: transform .3s var(--e-out); }
+.skip:focus-visible { transform: none; }
+
+/* paper / film grain — tactile, sits above everything */
+.grain {
+  position: fixed; inset: -100%; width: 300%; height: 300%; z-index: 90; pointer-events: none;
+  opacity: .5; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain .9s steps(5) infinite;
+}
+@keyframes grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -4%); } 60% { transform: translate(-4%, -1%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); } }
+
+/* ==========================================================================
+   Layers — the fixed 3D object lives between text "under" and UI "over"
+   ========================================================================== */
+.gl { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 1; pointer-events: none; }
+.under { position: relative; z-index: 0; }
+.over { position: relative; z-index: 2; }
+.wipe { position: fixed; inset: 0; z-index: -1; pointer-events: none; clip-path: circle(0% at var(--wx, 50%) var(--wy, 50%)); }
+.wipe.is-run { clip-path: circle(150% at var(--wx, 50%) var(--wy, 50%)); transition: clip-path 1s var(--e-io); }
+
+/* ==========================================================================
+   Controls
+   ========================================================================== */
+.pp { position: relative; width: 14px; height: 16px; display: block; }
+.pp > i { position: absolute; top: 0; height: 100%; width: 50%; background: currentColor; transition: clip-path .45s var(--e-out); }
+.pp > i:first-child { left: 0; clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%); }
+.pp > i:last-child { left: 50%; clip-path: polygon(0 25%, 100% 50%, 100% 50%, 0 75%); }
+.is-playing .pp > i:first-child { clip-path: polygon(0 0, 62% 0, 62% 100%, 0 100%); }
+.is-playing .pp > i:last-child { clip-path: polygon(38% 0, 100% 0, 100% 100%, 38% 100%); }
+
+/* text link with a line that leaves and re-enters */
+.ul { position: relative; display: inline-flex; align-items: center; gap: .45em; padding: 4px 0; }
+.ul::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: currentColor; transform-origin: right; transition: transform .6s var(--e-out); }
+.ul:hover::after, .ul:focus-visible::after { transform: scaleX(0); }
+.ul:hover::after { animation: ul-in .9s var(--e-out) .25s forwards; }
+@keyframes ul-in { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); transform-origin: left; } }
+.ul svg { width: .8em; height: .8em; transition: transform .5s var(--e-out); }
+.ul:hover svg { transform: translate(2px, -2px); }
+
+/* round solid button: label slides, fill swaps */
+.rb {
+  --s: 64px;
+  position: relative; width: var(--s); height: var(--s); border-radius: 50%; flex: none;
+  display: grid; place-items: center; background: var(--fg); color: var(--bg); overflow: hidden; isolation: isolate;
+  transition: transform .5s var(--e-back);
+}
+.rb::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--accent); transform: scale(0); transition: transform .5s var(--e-out); z-index: -1; }
+.rb:hover::before, .rb:focus-visible::before { transform: scale(1); }
+.rb:active { transform: scale(.92); }
+.rb .pp { transform: translateX(1px); }
+.rb.is-playing .pp { transform: none; }
+
+/* mask reveal: words rise from a slit */
+.mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .08em; margin-bottom: -.08em; }
+.mask > span { display: inline-block; transform: translateY(105%); transition: transform 1.2s var(--e-out); transition-delay: calc(var(--i, 0) * 45ms); }
+.is-in .mask > span, .mask.is-in > span { transform: none; }
+[data-reveal] { opacity: 0; transform: translateY(30px); transition: opacity 1.2s var(--e-out), transform 1.2s var(--e-out); transition-delay: var(--d, 0s); }
+[data-reveal].is-in { opacity: 1; transform: none; }
+
+/* ==========================================================================
+   Cursor
+   ========================================================================== */
+.cursor { position: fixed; inset: 0; z-index: 100; pointer-events: none; display: none; }
+html.has-cursor .cursor { display: block; }
+.cursor__dot {
+  position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+  background: #fff; mix-blend-mode: difference; will-change: transform;
+  transition: width .5s var(--e-out), height .5s var(--e-out), margin .5s var(--e-out), opacity .3s;
+}
+.cursor__disc {
+  position: absolute; left: 0; top: 0; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--fg); color: var(--bg);
+  font: 400 19px/1 var(--f-s); font-style: italic; white-space: nowrap;
+  transform: scale(0); will-change: transform; transition: transform .55s var(--e-out);
+}
+.cursor.is-link .cursor__dot { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
+.cursor.is-label .cursor__dot { opacity: 0; }
+.cursor.is-hidden .cursor__dot { opacity: 0; }
+.cursor.is-down .cursor__dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+
+/* toast */
+.toasts { position: fixed; z-index: 95; left: var(--g); bottom: calc(var(--g) + var(--safe-b)); display: grid; gap: 8px; pointer-events: none; max-width: min(88vw, 420px); }
+.toast { padding: 12px 18px; border-radius: 99px; background: var(--fg); color: var(--bg); font: 500 13px/1.35 var(--f-d); animation: t-in .6s var(--e-out) both; }
+.toast.is-out { animation: t-out .45s var(--e-io) forwards; }
+@keyframes t-in { from { opacity: 0; transform: translateY(14px); } }
+@keyframes t-out { to { opacity: 0; transform: translateY(8px); } }
+
+/* ==========================================================================
+   Loader
+   ========================================================================== */
+.loader {
+  position: fixed; inset: 0; z-index: 120; background: var(--bg); color: var(--fg);
+  display: grid; grid-template-rows: auto 1fr auto; padding: var(--g);
+  clip-path: inset(0 0 0 0);
+}
+.loader.is-leaving { clip-path: inset(0 0 100% 0); transition: clip-path 1.2s var(--e-io); }
+.loader.is-gone { display: none; }
+.loader__top { display: flex; justify-content: space-between; align-items: baseline; }
+.loader__brand { font: 800 18px/1 var(--f-d); letter-spacing: -.02em; }
+.loader__mid { display: grid; place-items: center; }
+.loader__enter {
+  width: clamp(140px, 16vw, 210px); aspect-ratio: 1; border-radius: 50%;
+  background: var(--fg); color: var(--bg); font: 400 clamp(26px, 2.6vw, 36px)/1 var(--f-s); font-style: italic;
+  transform: scale(0); transition: transform 1s var(--e-back), background-color .4s;
+}
+.loader.is-ready .loader__enter { transform: scale(1); }
+.loader__enter:hover { background: var(--accent); }
+.loader__bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
+.loader__num { font: 900 clamp(110px, 24vw, 380px)/.74 var(--f-d); font-variation-settings: 'wdth' 62; letter-spacing: -.03em; font-variant-numeric: tabular-nums; margin-bottom: -.04em; }
+.loader__note { max-width: 24ch; text-align: right; }
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+.top {
+  position: fixed; z-index: 50; left: 0; right: 0; top: 0;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding: var(--g) var(--g) 0; pointer-events: none;
+}
+.top > * { pointer-events: auto; }
+.wordmark { justify-self: start; font: 800 19px/1 var(--f-d); letter-spacing: -.03em; display: inline-flex; gap: 8px; align-items: center; }
+.wordmark i { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); transition: transform .8s var(--e-back); }
+.wordmark:hover i { transform: scale(1.8); }
+.now {
+  justify-self: center; display: inline-flex; align-items: center; gap: 10px;
+  font: 500 13px/1 var(--f-d); opacity: 0; transform: translateY(-8px); transition: opacity .6s, transform .6s var(--e-out);
+}
+.now.is-on { opacity: 1; transform: none; }
+.now__ring { width: 16px; height: 16px; }
+.now__ring circle { fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: .7 1; transform-origin: center; animation: spin 2.4s linear infinite; }
+.now .serif { font-size: 16px; }
+.menu-btn { justify-self: end; display: inline-flex; align-items: center; gap: 12px; font: 600 14px/1 var(--f-d); padding: 8px 0; }
+.menu-btn__d { position: relative; width: 26px; height: 10px; }
+.menu-btn__d i { position: absolute; left: 0; right: 0; height: 1.5px; background: currentColor; transition: transform .6s var(--e-out), top .6s var(--e-out), right .6s var(--e-out); }
+.menu-btn__d i:first-child { top: 1px; }
+.menu-btn__d i:last-child { top: 8px; right: 8px; }
+.menu-btn:hover .menu-btn__d i:last-child { right: 0; }
+.menu-btn[aria-expanded="true"] .menu-btn__d i:first-child { top: 4.5px; transform: rotate(40deg); }
+.menu-btn[aria-expanded="true"] .menu-btn__d i:last-child { top: 4.5px; right: 0; transform: rotate(-40deg); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+.hero { position: relative; height: 100vh; height: 100svh; min-height: 620px; overflow: hidden; touch-action: pan-y; }
+.hero__title {
+  position: absolute; left: -.035em; right: 0; bottom: -.115em;
+  font: 800 36.5vw/.8 var(--f-d); letter-spacing: -.045em; text-transform: uppercase;
+  white-space: nowrap; user-select: none; -webkit-user-select: none;
+}
+.hero__title .k {
+  --wd: 100; --wg: 800;
+  display: inline-block; font-variation-settings: 'wdth' var(--wd), 'wght' var(--wg);
+}
+.hero__title .k > span { display: inline-block; transform: translateY(102%); transition: transform 1.6s var(--e-out); transition-delay: calc(var(--i) * 90ms + .1s); }
+.is-entered .hero__title .k > span { transform: none; }
+.hero__title .m-br { display: none; }
+.hero__title-clip { position: absolute; inset: 0; overflow: hidden; }
+
+.hero__copy { position: absolute; inset: 0; pointer-events: none; }
+.hero__copy > * { pointer-events: auto; }
+.hero__intro { position: absolute; left: var(--g); top: calc(var(--g) + 70px); max-width: 23ch; font: 500 clamp(15px, 1.15vw, 18px)/1.35 var(--f-d); }
+.hero__intro .lab { display: block; margin-bottom: 10px; }
+.hero__phrase {
+  position: absolute; right: var(--g); top: calc(var(--g) + 64px); text-align: right;
+  font-size: clamp(34px, 4.6vw, 78px); line-height: .95; max-width: 9em;
+}
+.hero__play { position: absolute; right: var(--g); top: 47%; display: flex; align-items: center; gap: 16px; }
+.hero__play .rb { --s: clamp(76px, 7vw, 104px); }
+.hero__play-txt { display: grid; gap: 3px; text-align: right; order: -1; }
+.hero__play-txt .serif { font-size: clamp(22px, 1.8vw, 28px); line-height: 1; }
+.hero__hint { position: absolute; left: var(--g); top: 47%; display: flex; align-items: center; gap: 12px; }
+.hero__hint i { width: 40px; height: 1px; background: var(--hair); position: relative; overflow: hidden; }
+.hero__hint i::after { content: ''; position: absolute; inset: 0; background: var(--fg); animation: hint 2.4s var(--e-io) infinite; }
+@keyframes hint { 0% { transform: translateX(-100%); } 60%, 100% { transform: translateX(100%); } }
+[data-in] { opacity: 0; transform: translateY(16px); transition: opacity 1.3s var(--e-out), transform 1.3s var(--e-out); transition-delay: var(--d, .6s); }
+.is-entered [data-in] { opacity: 1; transform: none; }
+
+/* ==========================================================================
+   About
+   ========================================================================== */
+.about { position: relative; padding: clamp(110px, 16vw, 230px) var(--g) clamp(80px, 10vw, 160px); }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--g); }
+.about__lab { grid-column: 1 / span 2; padding-top: .6em; }
+.about__state {
+  grid-column: 3 / span 10;
+  font: 800 clamp(34px, 5.6vw, 100px)/.95 var(--f-d); letter-spacing: -.035em; text-transform: uppercase;
+  font-variation-settings: 'wdth' 88;
+}
+.about__state .serif { text-transform: none; font-size: 1.08em; letter-spacing: -.02em; color: var(--accent); }
+.about__small { grid-column: 8 / span 4; margin-top: clamp(50px, 6vw, 90px); font-size: clamp(15px, 1.1vw, 18px); line-height: 1.45; color: var(--muted); }
+.about__small b { color: var(--fg); font-weight: 600; }
+
+.art { position: relative; margin-top: clamp(90px, 12vw, 180px); height: clamp(620px, 72vw, 1080px); }
+.art__tile {
+  position: absolute; display: block; will-change: transform;
+}
+.art__tile:nth-child(1) { left: 2%; top: 0; width: 30%; }
+.art__tile:nth-child(2) { left: 41%; top: 26%; width: 23%; }
+.art__tile:nth-child(3) { right: 0; top: 6%; width: 27%; }
+.art__img { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 2px; background: var(--hair); clip-path: inset(100% 0 0 0); transition: clip-path 1.4s var(--e-io); }
+.art__tile:nth-child(2) .art__img { aspect-ratio: 1; }
+.art.is-in .art__img { clip-path: inset(0 0 0 0); }
+.art__tile:nth-child(2) .art__img { transition-delay: .15s; }
+.art__tile:nth-child(3) .art__img { transition-delay: .3s; }
+.art__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); transition: transform 1.6s var(--e-out); }
+.art__tile:hover .art__img img { transform: scale(1.02); }
+.art__dust { position: absolute; inset: 0; width: 100%; height: 100%; }
+.art__cap { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 12px; }
+.art__cap b { font-weight: 600; }
+.art__cap .serif { font-size: 18px; }
+
+/* ==========================================================================
+   States — the player
+   ========================================================================== */
+.states { position: relative; height: 100vh; height: 100svh; min-height: 640px; overflow: hidden; user-select: none; -webkit-user-select: none; }
+.states__title-wrap { position: absolute; inset: 0; pointer-events: none; }
+.stitle { position: absolute; white-space: nowrap; user-select: none; }
+.stitle__l { display: block; }
+.stitle__l + .stitle__l { position: absolute; inset: 0; color: var(--fg); }
+.stitle__base { opacity: .16; }
+.stitle .c { display: inline-block; overflow: hidden; vertical-align: bottom; }
+.stitle .c > span { display: inline-block; transform: translateY(105%); transition: transform 1.1s var(--e-out); transition-delay: calc(var(--i) * 30ms + .2s); }
+.stitle.is-in .c > span { transform: none; }
+.stitle.is-out .c > span { transform: translateY(-105%); transition: transform .45s var(--e-io); transition-delay: calc(var(--i) * 12ms); }
+
+.states[data-state="0"] .stitle { left: var(--g); bottom: 17vh; font: 400 16vw/.9 var(--f-s); font-style: italic; letter-spacing: -.03em; }
+.states[data-state="1"] .stitle { left: -.02em; top: 11vh; font: 900 27vw/.8 var(--f-d); font-variation-settings: 'wdth' 62; letter-spacing: -.02em; text-transform: uppercase; }
+.states[data-state="2"] .stitle { left: 0; right: 0; top: 50%; margin-top: -.5em; text-align: center; font: 200 10.5vw/1 var(--f-d); font-variation-settings: 'wdth' 125; letter-spacing: .02em; text-transform: uppercase; }
+
+.states__ui { position: absolute; inset: 0; display: grid; grid-template-rows: auto 1fr auto; padding: calc(var(--g) + 64px) var(--g) calc(var(--g) + var(--safe-b)); pointer-events: none; }
+.states__ui > * { pointer-events: auto; }
+.states__ui > [aria-hidden] { pointer-events: none; }
+.states__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.states__desc { display: grid; gap: 8px; max-width: 22ch; }
+.states__desc .serif { font-size: clamp(22px, 1.9vw, 30px); line-height: 1.05; }
+
+.switch { display: flex; gap: clamp(18px, 2.4vw, 40px); }
+.switch__item { display: grid; justify-items: start; gap: 6px; text-align: left; color: var(--muted); transition: color .5s; position: relative; }
+.switch__n { font: 400 clamp(40px, 4vw, 64px)/.85 var(--f-s); font-style: italic; transition: transform .7s var(--e-out); }
+.switch__t { font: 500 12px/1.2 var(--f-d); max-width: 14ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.switch__item::after { content: ''; position: absolute; left: 0; right: 0; bottom: -8px; height: 1.5px; background: var(--fg); transform: scaleX(0); transform-origin: left; transition: transform .7s var(--e-out); }
+.switch__item:hover { color: var(--fg); }
+.switch__item:hover .switch__n { transform: translateY(-4px) rotate(-4deg); }
+.switch__item.is-active { color: var(--fg); }
+.switch__item.is-active::after { transform: scaleX(1); }
+.switch__item.is-preview .switch__n { color: var(--accent); }
+
+.pbar { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: clamp(16px, 2vw, 32px); }
+.pbar .rb { --s: 68px; }
+.ptime { display: grid; gap: 3px; min-width: 88px; font-variant-numeric: tabular-nums; }
+.ptime b { font: 700 22px/1 var(--f-d); letter-spacing: -.02em; font-variation-settings: 'wdth' 80; }
+.wave { position: relative; height: 56px; touch-action: none; cursor: pointer; }
+.wave canvas { width: 100%; height: 100%; }
+.wave__tip { position: absolute; bottom: calc(100% + 4px); left: 0; transform: translateX(-50%); font: 400 17px/1 var(--f-s); font-style: italic; opacity: 0; transition: opacity .25s; pointer-events: none; white-space: nowrap; }
+.wave.is-hover .wave__tip { opacity: 1; }
+.pside { display: flex; align-items: center; gap: clamp(14px, 1.6vw, 26px); white-space: nowrap; }
+.pside .ul { font: 600 13px/1 var(--f-d); }
+.step { display: inline-flex; gap: 2px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; transition: background-color .3s, transform .4s var(--e-out); }
+.step button:hover { background: var(--hair); }
+.step button:active { transform: scale(.9); }
+.step svg { width: 14px; height: 14px; }
+.vol { display: inline-flex; align-items: baseline; gap: 6px; touch-action: none; cursor: ew-resize; font: 600 13px/1 var(--f-d); user-select: none; }
+.vol b { font: 400 20px/1 var(--f-s); font-style: italic; min-width: 2.2ch; font-variant-numeric: tabular-nums; }
+.vol.is-muted b { text-decoration: line-through; opacity: .5; }
+.pnote { font-size: 11px; color: var(--muted); }
+
+.orb-hit { position: fixed; z-index: 1; left: 0; top: 0; border-radius: 50%; touch-action: none; display: none; }
+.orb-hit.is-on { display: block; }
+@media (hover: none), (pointer: coarse) { .orb-hit { touch-action: pan-y; } }
+.orb-hit:focus-visible { outline-offset: -2px; }
+
+/* lyrics — sung inside the circle */
+.lyric { position: fixed; z-index: 0; left: 0; top: 0; display: grid; place-items: center; text-align: center; pointer-events: none; opacity: 0; transition: opacity .8s var(--e-out); }
+.lyric.is-on { opacity: 1; }
+.lyric__line { grid-area: 1 / 1; max-width: 100%; font: 400 clamp(20px, 2.35vw, 42px)/1.1 var(--f-s); font-style: italic; letter-spacing: -.01em; text-wrap: balance; }
+.lyric__line .lw { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 .04em .12em; margin-bottom: -.12em; }
+.lyric__line .lw > span { display: inline-block; transform: translateY(110%); opacity: .3; transition: transform 1s var(--e-out), opacity .45s; transition-delay: calc(var(--i) * 45ms), 0s; }
+.lyric__line.is-in .lw > span { transform: none; }
+.lyric__line .lw > span.is-sung { opacity: 1; }
+.lyric__line.is-out { animation: lyric-out .7s var(--e-io) forwards; }
+@keyframes lyric-out { to { opacity: 0; transform: translateY(-18px); filter: blur(8px); } }
+.stitle { transition: opacity 1s var(--e-out); }
+.states.has-lyric .stitle { opacity: .28; }
+.states.has-lyric[data-state="2"] .stitle { opacity: .1; }
+@media (max-width: 600px) { .lyric__line { font-size: clamp(17px, 4.8vw, 24px); } }
+
+/* ==========================================================================
+   Listen on Suno — inverted
+   ========================================================================== */
+.listen { position: relative; padding: clamp(110px, 14vw, 200px) var(--g) clamp(70px, 8vw, 120px); }
+.listen__lab { display: flex; justify-content: space-between; margin-bottom: clamp(30px, 4vw, 60px); }
+.big { display: block; position: relative; }
+.big__row { display: block; white-space: nowrap; font: 900 19vw/.8 var(--f-d); letter-spacing: -.035em; text-transform: uppercase; }
+.big__row .k { display: inline-block; font-variation-settings: 'wdth' var(--wd, 80), 'wght' 900; transition: color .4s; }
+.big__row--s { font: 400 15vw/.8 var(--f-s); font-style: italic; text-transform: none; letter-spacing: -.03em; padding-left: 26vw; color: var(--accent); }
+.big__row--r { text-align: right; }
+.big__arrow { display: inline-block; width: .62em; height: .62em; vertical-align: .04em; margin-left: .06em; transition: transform .9s var(--e-out); }
+.big:hover .big__arrow { transform: rotate(45deg); }
+.listen__foot { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--g); margin-top: clamp(70px, 9vw, 130px); }
+.listen__handle { grid-column: 1 / span 4; display: grid; gap: 10px; align-content: start; }
+.listen__handle a { font: 400 clamp(24px, 2.2vw, 34px)/1.05 var(--f-s); font-style: italic; }
+.listen__list { grid-column: 7 / span 6; }
+.lrow { display: grid; grid-template-columns: 3.4em 1fr auto; align-items: baseline; gap: 12px; padding: 18px 0; border-top: 1px solid var(--hair); transition: padding .6s var(--e-out); }
+.lrow:last-child { border-bottom: 1px solid var(--hair); }
+.lrow b { font: 700 clamp(18px, 1.6vw, 24px)/1.1 var(--f-d); letter-spacing: -.02em; }
+.lrow .serif { font-size: 20px; }
+.lrow svg { width: 14px; height: 14px; transition: transform .6s var(--e-out); }
+.lrow:hover { padding-left: 14px; }
+.lrow:hover svg { transform: rotate(45deg); color: var(--accent); }
+
+.foot { position: relative; padding: clamp(50px, 6vw, 90px) var(--g) calc(var(--g) + var(--safe-b)); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 22px; }
+.foot__mark { font: 800 clamp(18px, 1.4vw, 22px)/1 var(--f-d); letter-spacing: -.03em; }
+.foot__links { display: flex; flex-wrap: wrap; gap: 26px; font-weight: 600; }
+body.has-dock .foot { padding-bottom: calc(var(--g) + 92px + var(--safe-b)); }
+
+/* ==========================================================================
+   Dock
+   ========================================================================== */
+.dock {
+  position: fixed; z-index: 40; left: var(--g); bottom: calc(var(--g) + var(--safe-b));
+  display: flex; align-items: center; gap: 14px; padding: 6px 20px 6px 6px; border-radius: 99px;
+  background: var(--fg); color: var(--bg); max-width: calc(100vw - 2 * var(--g));
+  transform: translateY(calc(100% + 40px)); transition: transform .8s var(--e-out);
+}
+.dock.is-on { transform: none; }
+.dock .rb { --s: 46px; background: var(--bg); color: var(--fg); }
+.dock__meta { display: grid; gap: 4px; min-width: 0; text-align: left; }
+.dock__t { font: 600 13px/1.1 var(--f-d); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 32ch; }
+.dock__time { font: 400 14px/1 var(--f-s); font-style: italic; opacity: .7; font-variant-numeric: tabular-nums; }
+.dock__bar { position: absolute; left: 60px; right: 22px; bottom: 7px; height: 1px; background: color-mix(in srgb, var(--bg) 25%, transparent); overflow: hidden; }
+.dock__bar i { display: block; height: 100%; background: var(--bg); transform-origin: left; transform: scaleX(0); }
+
+/* ==========================================================================
+   Menu
+   ========================================================================== */
+.menu {
+  position: fixed; inset: 0; z-index: 45; background: var(--fg); color: var(--bg);
+  clip-path: circle(0% at var(--ox, 95%) var(--oy, 4%)); visibility: hidden;
+  transition: clip-path 1s var(--e-io), visibility 0s 1s;
+  display: grid; grid-template-rows: 1fr auto; padding: calc(var(--g) + 70px) var(--g) calc(var(--g) + var(--safe-b));
+  overflow: auto;
+}
+.menu.is-open { clip-path: circle(150% at var(--ox, 95%) var(--oy, 4%)); visibility: visible; transition: clip-path 1s var(--e-io), visibility 0s; }
+.menu__list { display: grid; align-content: center; }
+.menu__item { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; overflow: hidden; }
+.menu__w {
+  display: inline-block; font: 900 clamp(56px, 11vw, 190px)/.86 var(--f-d); letter-spacing: -.035em; text-transform: uppercase;
+  font-variation-settings: 'wdth' 70; transform: translateY(105%);
+  transition: font-variation-settings .9s var(--e-out), transform 1s var(--e-out), color .4s;
+}
+.menu.is-open .menu__w { transform: none; transition-delay: 0s, calc(.3s + var(--i) * 70ms), 0s; }
+.menu__item:hover .menu__w, .menu__item:focus-visible .menu__w { font-variation-settings: 'wdth' 125; color: var(--accent); }
+.menu__d { font: 400 clamp(18px, 1.8vw, 28px)/1 var(--f-s); font-style: italic; opacity: 0; transform: translateX(-12px); transition: opacity .5s, transform .6s var(--e-out); }
+.menu__item:hover .menu__d { opacity: .7; transform: none; }
+.menu__foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px 30px; padding-top: 30px; opacity: .7; font-size: 13px; }
+.menu__foot kbd { font: inherit; font-weight: 700; }
+body.menu-open .top { color: var(--bg); }
+body.menu-open .now { opacity: 0; }
+
+/* drop overlay */
+.drop { position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 88%, transparent); opacity: 0; pointer-events: none; transition: opacity .3s; text-align: center; }
+.drop.is-on { opacity: 1; }
+.drop p { font: 400 clamp(36px, 6vw, 90px)/1 var(--f-s); font-style: italic; }
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 1100px) {
+  .pbar { grid-template-columns: auto auto minmax(0, 1fr); }
+  .pside { grid-column: 1 / -1; justify-content: space-between; }
+  .art__tile:nth-child(2) { left: 38%; width: 26%; }
+}
+@media (max-width: 600px) {
+  body { font-size: 13.5px; }
+  .now { display: none; }
+  .top { grid-template-columns: 1fr auto; }
+
+  .hero__title { font-size: 63vw; line-height: .78; left: -.03em; bottom: -.1em; white-space: nowrap; }
+  .hero__title .m-br { display: block; }
+  .hero__intro { top: calc(var(--g) + 54px); max-width: 20ch; }
+  .hero__phrase { display: none; }
+  .hero__play { top: calc(var(--g) + 136px); left: var(--g); right: auto; }
+  .hero__play .rb { --s: 64px; }
+  .hero__play-txt { order: 1; text-align: left; }
+  .hero__hint { display: none; }
+
+  .grid { display: block; }
+  .about__lab { margin-bottom: 26px; }
+  .about__small { margin-top: 40px; }
+  .art { height: auto; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 70px calc(-1 * var(--g)) 0; padding: 0 var(--g); scrollbar-width: none; }
+  .art::-webkit-scrollbar { display: none; }
+  .art__tile { position: relative !important; left: auto !important; right: auto !important; top: auto !important; width: 72% !important; flex: none; scroll-snap-align: center; transform: none !important; }
+
+  .states { min-height: 680px; }
+  .states__ui { padding-top: calc(var(--g) + 50px); }
+  .states__head { flex-direction: column; gap: 18px; }
+  .states__desc { max-width: none; }
+  .switch { width: 100%; justify-content: space-between; }
+  .switch__t { max-width: 22vw; }
+  .states[data-state="0"] .stitle { bottom: 34vh; font-size: 22vw; }
+  .states[data-state="1"] .stitle { top: auto; bottom: 30vh; font-size: 40vw; }
+  .states[data-state="2"] .stitle { top: auto; bottom: 34vh; margin-top: 0; font-size: 13vw; }
+  .pbar { grid-template-columns: auto minmax(0, 1fr); row-gap: 14px; }
+  .pbar .ptime { order: 2; }
+  .pbar .wave { grid-column: 1 / -1; order: -1; height: 46px; }
+  .pside { grid-column: 1 / -1; order: 3; flex-wrap: wrap; row-gap: 10px; }
+
+  .big__row { font-size: 21vw; }
+  .big__row--s { font-size: 17vw; padding-left: 16vw; }
+  .listen__foot { display: grid; grid-template-columns: 1fr; row-gap: 50px; }
+  .listen__handle, .listen__list { grid-column: auto; }
+  .foot { flex-direction: column; align-items: flex-start; }
+  .dock { left: 10px; right: 10px; bottom: calc(10px + var(--safe-b)); max-width: none; }
+  .dock__t { max-width: none; }
+  .menu__d { display: none; }
+}
+
+/* ==========================================================================
+   Touch screens — a calmer, lighter build of the same site
+   ========================================================================== */
+.swipe-hint { display: none; }
+.rotate { display: none; }
+.is-phone .grain, .is-tablet .grain { display: none; }
+.is-phone .toast, .is-tablet .toast { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.is-phone .hero__hint, .is-tablet .hero__hint { display: none; }
+.is-phone .hero__title .k, .is-tablet .hero__title .k { transform-origin: 50% 100%; will-change: transform; }
+.is-phone .hero__title .k { --wd: 84; }
+.is-tablet .hero__title .k { --wd: 94; }
+.is-phone .big__row .k, .is-tablet .big__row .k { --wd: 80; }
+.swipe-hint { align-items: center; gap: 8px; transition: opacity .8s var(--e-out), transform .8s var(--e-out); }
+.swipe-hint i { width: 18px; height: 1px; background: currentColor; position: relative; overflow: hidden; }
+.swipe-hint i::after { content: ''; position: absolute; inset: 0; background: var(--accent); animation: hint 2.4s var(--e-io) infinite; }
+.swipe-hint.is-gone { opacity: 0; transform: translateY(-4px); pointer-events: none; }
+.is-phone .swipe-hint, .is-tablet .swipe-hint { display: flex; }
+
+/* phones, 6.1–6.9" (≈ 375–440 css px wide) */
+.is-phone body { font-size: 14px; }
+.is-phone .hero__intro { top: calc(var(--g) + 56px); max-width: 17ch; font-size: 15px; }
+.is-phone .hero__play { top: calc(var(--g) + 58px); right: var(--g); left: auto; flex-direction: column; align-items: flex-end; gap: 10px; }
+.is-phone .hero__play .rb { --s: 62px; }
+.is-phone .hero__play-txt { order: 1; text-align: right; }
+.is-phone .hero__play-txt .serif { font-size: 19px; }
+.is-phone .states__ui { padding-top: calc(var(--g) + 50px); }
+.is-phone .states__head { gap: 14px; }
+.is-phone .states__desc { gap: 6px; }
+.is-phone .states__desc .serif { font-size: 20px; }
+.is-phone .switch__n { font-size: 38px; }
+.is-phone .states .stitle {
+  left: 0 !important; right: 0 !important; top: auto !important; bottom: calc(232px + var(--safe-b)) !important; margin: 0 !important;
+  text-align: center; line-height: .95;
+}
+.is-phone .states[data-state="0"] .stitle { font-size: 14vw; }
+.is-phone .states[data-state="1"] .stitle { font-size: 17vw; }
+.is-phone .states[data-state="2"] .stitle { font-size: 8.6vw; }
+.is-phone .pbar { column-gap: 16px; row-gap: 16px; }
+.is-phone .pbar .rb { --s: 64px; }
+.is-phone .pside { flex-wrap: nowrap; justify-content: space-between; column-gap: 10px; }
+.is-phone .pside .pnote { display: none; }
+.is-phone .step button { width: 44px; height: 44px; }
+.is-phone .switch__item, .is-phone .pside .ul, .is-phone .vol { min-height: 44px; }
+.is-phone .art__tile { width: 78% !important; }
+.is-phone .big__row { font-size: 21.5vw; }
+.is-phone .dock { padding-right: 16px; }
+
+/* upright tablets (iPad mini → iPad Pro 13", Android tablets) */
+.is-tablet.is-portrait .hero__play { top: calc(var(--g) + 170px); left: var(--g); right: auto; }
+.is-tablet.is-portrait .hero__play-txt { order: 1; text-align: left; }
+.is-tablet.is-portrait .hero__phrase { font-size: 4.4vw; }
+.is-tablet.is-portrait .states[data-state="0"] .stitle { font-size: 15vw; bottom: 19vh; }
+.is-tablet.is-portrait .states[data-state="2"] .stitle { font-size: 9.5vw; }
+.is-tablet.is-portrait .art { height: 152vw; margin-bottom: 4vw; }
+.is-tablet.is-portrait .art__tile:nth-child(1) { width: 40%; }
+.is-tablet.is-portrait .art__tile:nth-child(2) { left: 50%; top: 30%; width: 34%; }
+.is-tablet.is-portrait .art__tile:nth-child(3) { right: auto; left: 8%; top: 58%; width: 38%; }
+.is-tablet .step button { width: 48px; height: 48px; }
+
+/* phones held sideways: this site is made for upright screens */
+.is-phone.is-landscape .rotate {
+  display: grid; position: fixed; inset: 0; z-index: 400; place-items: center; align-content: center; gap: 18px;
+  background: var(--bg); color: var(--fg); text-align: center; padding: 24px;
+}
+.rotate svg { width: 54px; height: 54px; animation: spin 6s linear infinite; }
+.rotate p { font: 400 26px/1.1 var(--f-s); font-style: italic; }
+
+@media (prefers-reduced-motion: reduce) {
+  .grain, .now__ring circle, .hero__hint i::after { animation: none !important; }
+  .mask > span, .stitle .c > span, .hero__title .k > span, [data-reveal], [data-in] { transition-duration: .01s !important; transition-delay: 0s !important; }
+}
+</style>
 </head>
-<body>
-    <h1>Miroslav — Web Developer</h1>
+<body class="is-locked">
+<a class="skip" href="#tracks">Skip to the music</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 16 16"><path d="M4 12 12 4M5 4h7v7" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 16 16"><path d="M13 3v10L5 8zM3 3v10" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 16 16"><path d="M3 3v10l8-5zM13 3v10" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="wipe" id="wipe" aria-hidden="true"></div>
+<canvas class="gl" id="gl" aria-hidden="true"></canvas>
+
+<!-- Loader -->
+<div class="loader" id="loader" role="dialog" aria-modal="true" aria-label="Enso">
+  <div class="loader__top"><span class="loader__brand">Enso</span><span class="lab">AI music artist</span></div>
+  <div class="loader__mid"><button class="loader__enter" id="loader-enter" type="button" data-cursor="hide">Enter</button></div>
+  <div class="loader__bottom">
+    <span class="loader__num" id="loader-num" aria-hidden="true">0</span>
+    <p class="loader__note lab">Three songs. Three states of one open circle.<br>Sound on.</p>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="top" id="top-bar">
+  <a class="wordmark" href="#top" aria-label="Enso — back to the top" data-cursor="link"><i aria-hidden="true"></i>Enso</a>
+  <a class="now" id="now" href="#tracks" aria-hidden="true" tabindex="-1" data-cursor="link">
+    <svg class="now__ring" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" pathLength="1"/></svg>
+    <span id="now-t">Track 01</span><span class="serif" id="now-s">Clay</span>
+  </a>
+  <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-cursor="link">
+    <span>Menu</span><span class="menu-btn__d" aria-hidden="true"><i></i><i></i></span>
+  </button>
+</header>
+
+<main id="main">
+
+<!-- Hero -->
+<section class="hero" id="top" aria-labelledby="hero-title" data-section="hero">
+  <div class="under hero__title-clip">
+    <h1 class="hero__title" id="hero-title" aria-label="Enso"><span class="k" aria-hidden="true" style="--i:0"><span>E</span></span><span class="k" aria-hidden="true" style="--i:1"><span>N</span></span><br class="m-br"><span class="k" aria-hidden="true" style="--i:2"><span>S</span></span><span class="k" aria-hidden="true" style="--i:3"><span>O</span></span></h1>
+  </div>
+  <div class="over hero__copy" id="hero-copy">
+    <p class="hero__intro" data-in style="--d:.7s"><span class="lab">AI music artist</span>Three songs. Three states of one open circle.</p>
+    <p class="hero__phrase serif" data-in style="--d:.85s">a circle drawn in one breath</p>
+    <p class="hero__hint lab" data-in style="--d:1.1s" aria-hidden="true"><i></i>Drag the circle</p>
+    <div class="hero__play" data-in style="--d:1s">
+      <div class="hero__play-txt"><span class="lab" id="hero-play-l">Play</span><span class="serif" id="hero-play-t">Track 01</span></div>
+      <button class="rb" id="hero-play" type="button" aria-label="Play Enso" data-magnetic="18" data-cursor="hide"><span class="pp" aria-hidden="true"><i></i><i></i></span></button>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section class="about" id="about" aria-labelledby="about-h" data-section="about">
+  <div class="over">
+    <div class="grid">
+      <h2 class="about__lab lab" id="about-h">About</h2>
+      <p class="about__state" id="about-state">Enso is a circle [drawn in one breath] — never perfect, never [fully closed.] An AI music artist making songs that [leave the gap open] for whoever is listening.</p>
+      <p class="about__small" data-reveal>Every song here turns the circle into <b>another state</b> — its own colour, material and motion. Press play and the song paints itself along the circle — and closes it at the very end. The full catalogue lives on <a class="ul" href="#" data-suno data-cursor="link">Suno</a>.</p>
+    </div>
+    <div class="art" id="art" aria-label="Artwork"></div>
+  </div>
+</section>
+
+<!-- States / player -->
+<section class="states" id="tracks" aria-labelledby="states-h" data-section="tracks" data-state="0">
+  <div class="under states__title-wrap">
+    <p class="stitle" id="stitle" aria-hidden="true"></p>
+  </div>
+  <div class="over states__ui">
+    <div class="states__head">
+      <div class="states__desc">
+        <h2 class="lab" id="states-h">Listen — <span id="state-count">I / III</span></h2>
+        <p class="serif" id="state-line">Clay — warm, slow, close.</p>
+        <p class="swipe-hint lab" id="swipe-hint" aria-hidden="true"><i></i>Tap the circle to play · swipe it to change the song</p>
+      </div>
+      <nav class="switch" id="switch" aria-label="Choose a song"></nav>
+    </div>
+    <div aria-hidden="true"></div>
+    <div class="pbar">
+      <button class="rb" id="p-toggle" type="button" aria-label="Play" data-cursor="hide" data-magnetic="10"><span class="pp" aria-hidden="true"><i></i><i></i></span></button>
+      <div class="ptime" aria-hidden="true"><b id="p-now">00:00</b><span class="lab" id="p-dur">—</span></div>
+      <div class="wave" id="wave" role="slider" tabindex="0" aria-label="Timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0:00" data-cursor="label" data-cursor-label="seek">
+        <canvas id="wave-cv" aria-hidden="true"></canvas>
+        <span class="wave__tip" id="wave-tip">0:00</span>
+      </div>
+      <div class="pside">
+        <span class="step"><button type="button" data-dir="-1" aria-label="Previous song" data-cursor="link"><svg aria-hidden="true"><use href="#i-prev"/></svg></button><button type="button" data-dir="1" aria-label="Next song" data-cursor="link"><svg aria-hidden="true"><use href="#i-next"/></svg></button></span>
+        <span class="vol" id="vol" role="slider" tabindex="0" aria-label="Volume — drag sideways, click to mute" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85" data-cursor="label" data-cursor-label="drag">Vol <b id="vol-n">85</b></span>
+        <button class="ul" id="p-share" type="button" data-cursor="link">Share</button>
+        <a class="ul" id="p-suno" href="#" target="_blank" rel="noopener" data-cursor="link">Open on Suno <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <span class="pnote" id="p-note"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Listen on Suno (inverted) -->
+<section class="listen" id="suno" aria-labelledby="listen-h" data-section="listen" data-invert>
+  <div class="over">
+    <div class="listen__lab"><span class="lab">Continue</span><span class="lab">suno.com</span></div>
+    <h2 class="sr-only" id="listen-h">Listen on Suno</h2>
+    <a class="big" id="big" href="#" target="_blank" rel="noopener" data-suno data-cursor="label" data-cursor-label="open ↗" aria-label="Listen to Enso on Suno (opens in a new tab)">
+      <span class="big__row" data-kin>Listen</span>
+      <span class="big__row big__row--s">on</span>
+      <span class="big__row big__row--r"><span data-kin>Suno</span><svg class="big__arrow" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+    </a>
+    <div class="listen__foot">
+      <div class="listen__handle">
+        <span class="lab">Profile</span>
+        <a class="ul" href="#" target="_blank" rel="noopener" data-suno data-cursor="link">@ensomusicrecords74</a>
+      </div>
+      <nav class="listen__list" id="listen-list" aria-label="Songs on Suno"></nav>
+    </div>
+  </div>
+</section>
+
+<footer class="foot over" data-section="foot" data-invert>
+  <span class="foot__mark">Enso</span>
+  <span class="lab">© <span id="year">2026</span> Enso · AI music artist · <kbd>Space</kbd> play · <kbd>N</kbd>/<kbd>P</kbd> songs · <kbd>←</kbd><kbd>→</kbd> seek</span>
+  <div class="foot__links">
+    <a class="ul" href="#" target="_blank" rel="noopener" data-suno data-cursor="link">Suno <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    <button class="ul" type="button" id="to-top" data-cursor="link">Back to the top</button>
+  </div>
+</footer>
+
+</main>
+
+<div class="orb-hit" id="orb-hit" role="slider" tabindex="0" aria-label="Song position — drag around the circle, click to play or pause" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0:00" data-cursor="label" data-cursor-label="play"></div>
+
+<aside class="dock" id="dock" aria-label="Now playing" aria-hidden="true">
+  <button class="rb" id="dock-toggle" type="button" aria-label="Play" tabindex="-1" data-cursor="link"><span class="pp" aria-hidden="true"><i></i><i></i></span></button>
+  <button class="dock__meta" id="dock-meta" type="button" tabindex="-1" data-cursor="link"><span class="dock__t" id="dock-t">Track 01</span><span class="dock__time" id="dock-time">0:00</span></button>
+  <span class="dock__bar" aria-hidden="true"><i id="dock-bar"></i></span>
+</aside>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+  <nav class="menu__list" aria-label="Sections">
+    <a class="menu__item" href="#top" style="--i:0" data-cursor="link"><span class="menu__w">Enso</span><span class="menu__d">the open circle</span></a>
+    <a class="menu__item" href="#about" style="--i:1" data-cursor="link"><span class="menu__w">About</span><span class="menu__d">who, or what</span></a>
+    <a class="menu__item" href="#tracks" style="--i:2" data-cursor="link"><span class="menu__w">Listen</span><span class="menu__d">three states</span></a>
+    <a class="menu__item" href="#suno" style="--i:3" data-cursor="link"><span class="menu__w">Suno</span><span class="menu__d">the full catalogue</span></a>
+  </nav>
+  <div class="menu__foot">
+    <span><kbd>Space</kbd> play / pause · <kbd>N</kbd> <kbd>P</kbd> songs · <kbd>←</kbd> <kbd>→</kbd> seek · <kbd>M</kbd> mute</span>
+    <a class="ul" href="#" target="_blank" rel="noopener" data-suno data-cursor="link">suno.com/@ensomusicrecords74</a>
+  </div>
+</div>
+
+<div class="rotate" aria-live="polite">
+  <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M44 12A22 22 0 1 1 28 10.6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 5"/></svg>
+  <p>Turn your phone upright</p>
+  <span class="lab">Enso is made for a vertical screen</span>
+</div>
+<div class="drop" id="drop" aria-hidden="true"><p>Release to play it here</p></div>
+<input type="file" id="file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac" hidden>
+
+<div class="cursor" id="cursor" aria-hidden="true"><div class="cursor__disc" id="cursor-disc"></div><div class="cursor__dot" id="cursor-dot"></div></div>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<p class="sr-only" id="sr-now" aria-live="polite"></p>
+<script>
+(() => {
+'use strict';
+
+/* ==========================================================================
+   CONFIG
+   --------------------------------------------------------------------------
+   src    : the audio file(s) inside this repository — the first one that
+            exists is played (audio/track-1.m4a, .mp3 or .mp4).
+   cover  : artwork shown in the About section.
+   songId : the Suno song UUID — fallback: streams from Suno's CDN if the
+            local file is missing. Also used for the cover art.
+   title  : set it to override the displayed name ('' = read from the MP3).
+   ========================================================================== */
+const CONFIG = {
+  sunoProfile: 'https://suno.com/@ensomusicrecords74?page=songs',
+  tracks: [
+    { code: 'FlUHU56FcRSXQtcj', songId: '06ebbe47-8539-4eea-916f-7017b690b90d', title: 'Life Is Stronger', cover: 'audio/cover-1.jpg', src: ['audio/track-1.m4a', 'audio/track-1.mp3', 'audio/track-1.mp4'] },
+    { code: 'Rkw3YUjjzWxiJ3Lj', songId: '303f09a5-e35c-4722-827e-9b280a07504e', title: 'Spring', cover: 'audio/cover-2.jpg', src: ['audio/track-2.m4a', 'audio/track-2.mp3', 'audio/track-2.mp4'] },
+    { code: 'Gcx2V4lbPDyMZvUh', songId: '80cf2f18-caf9-4f7a-a16a-2eab9a8f1e55', title: 'Lonly streets', cover: 'audio/cover-3.jpg', src: ['audio/track-3.m4a', 'audio/track-3.mp3', 'audio/track-3.mp4'] },
+  ],
+};
+
+/* Lyrics, timed to the songs (seconds). Timings were read from the Suno lyric videos;
+   the text follows the artist's own lyric sheets. */
+const LYRICS = {
+  FlUHU56FcRSXQtcj: [
+    [39.6, "I walked a road with no lights in sight,"],
+    [44.6, "Where fear and cold keep hiding the sky."],
+    [49.2, "But I can see the morning rise,"],
+    [54.0, "A burning dawn before my eyes."],
+    [56.2, "Death is a shadow,"],
+    [60.4, "Life is the light."],
+    [64.4, "Darkness is empty,"],
+    [65.4, "It won’t win this fight."],
+    [69.0, "Good is the rhythm"],
+    [71.4, "Beating inside."],
+    [72.2, "As long as this heart keeps burning,"],
+    [74.8, "The fire stays alive."],
+    [77.0, "Life is stronger!"],
+    [79.4, "Light is stronger!"],
+    [81.6, "Love is louder than the night!"],
+    [85.0, "Hey! Hey!"],
+    [86.4, "Life is stronger!"],
+    [88.8, "Light is stronger!"],
+    [89.6, "You can’t break us —"],
+    [92.6, "We’re rising high!"],
+    [96.2, "Hey! Hey!"],
+    [100.2, ""],
+    [134.4, "Hear that beat — it’s calling my soul."],
+    [139.2, "Through the fire we never let go."],
+    [144.0, "Faith keeps moving us ahead,"],
+    [148.8, "Nothing can silence what we’ve said."],
+    [153.2, "We break the chains,"],
+    [154.2, "The dark fades away."],
+    [155.6, "When love keeps burning,"],
+    [156.8, "It leads the way."],
+    [158.0, "This world was never"],
+    [159.4, "Made for hate."],
+    [160.4, "We’re building tomorrow"],
+    [161.8, "Before it’s too late."],
+    [164.8, "Life is stronger!"],
+    [167.2, "Light is stronger!"],
+    [169.4, "Love is louder than the night!"],
+    [173.0, "Hey! Hey!"],
+    [174.4, "Life is stronger!"],
+    [176.8, "Light is stronger!"],
+    [179.0, "You can’t stop us —"],
+    [180.4, "We’re rising high!"],
+    [184.0, "Hey! Hey!"],
+    [188.0, ""],
+    [213.6, "Death is fading —"],
+    [216.2, "Life remains."],
+    [218.6, "Darkness falls,"],
+    [220.2, "Light breaks the chains."],
+    [223.0, "Love keeps growing,"],
+    [225.4, "Hope survives."],
+    [227.8, "Forever and ever —"],
+    [231.4, "We’re alive!"],
+    [233.4, "Hey! Hey!"],
+    [237.2, "Hey! Hey!"],
+    [241.0, "Hey! Hey!"],
+    [245.0, ""],
+    [247.0, "Forever and ever…"],
+    [251.0, ""],
+    [255.0, "Life is stronger."],
+    [259.0, ""],
+  ],
+  Rkw3YUjjzWxiJ3Lj: [
+    [19.6, "Snow melts quietly — like words from the past,"],
+    [24.5, ""],
+    [46.2, "That have lost their weight and are needed no more."],
+    [51.2, "And in the pauses between the lines, spring speaks,"],
+    [55.8, "Like a first step beyond the silent door."],
+    [61.0, "Yesterday’s fear — like ice on the road,"],
+    [65.6, "Broken by light that falls through the sky."],
+    [68.4, "And all that once felt heavy to hold"],
+    [73.4, "Becomes just a shadow passing by."],
+    [81.6, "Spring arrives — and breaks every border,"],
+    [85.8, "Washing doubts away with gentle rain."],
+    [89.8, "Let the past softly dream in our memory —"],
+    [95.0, "We step into tomorrow with open flame."],
+    [98.6, "Spring is the risk of being alive again,"],
+    [105.4, "Without masks, without roles to play."],
+    [109.0, "And what once seemed a long, endless road"],
+    [113.6, "Becomes the beginning of a new way."],
+    [118.8, ""],
+    [136.6, "We let go of the dreams we once had,"],
+    [141.8, "The ones we couldn’t hold or keep."],
+    [146.0, "Yet every loss lifts us higher instead,"],
+    [150.8, "And every goodbye plants promises deep."],
+    [156.2, "A broken world is not emptiness —"],
+    [159.0, "It waits to be gathered, piece by piece."],
+    [165.8, "Where darkness once quietly lay in rest,"],
+    [170.8, "Light learned how to increase."],
+    [177.6, "Spring arrives — and breaks every border,"],
+    [181.6, "Washing doubts away with gentle rain."],
+    [185.8, "Let the past softly dream in our memory —"],
+    [189.2, "We step into tomorrow with open flame."],
+    [196.4, "Spring is the risk of being alive again,"],
+    [201.4, "Without masks, without roles to play."],
+    [205.0, "And what once seemed a long, endless road"],
+    [209.6, "Becomes the beginning of a new way."],
+    [214.8, ""],
+    [232.4, "Do not hold in your hands the ash of yesterday’s words —"],
+    [237.8, "They no longer warm, they only pull you down."],
+    [243.0, "Open your heart to new worlds that unfold,"],
+    [246.8, "And let yourself wear hope like a crown."],
+    [252.9, ""],
+    [257.0, "Spring arrives — and the heart begins to sing,"],
+    [259.4, "With more light than it held before."],
+    [262.2, "May life hear the quiet answer you bring —"],
+    [265.2, "You choose yourself and say “yes” once more."],
+    [269.9, ""],
+    [290.6, "And all that was fades peacefully away,"],
+    [295.0, "Like snow dissolving into time’s stream…"],
+    [300.6, "Spring is the courage to live each day"],
+    [304.4, "With gratitude for every moment we breathe."],
+    [310.0, ""],
+  ],
+  Gcx2V4lbPDyMZvUh: [
+    [29.2, "The streets are sleeping"],
+    [35.8, "Nothing under my window now"],
+    [42.4, "This hour feels too quiet"],
+    [46.6, "I light a candle,"],
+    [49.6, "I write it down."],
+    [53.9, ""],
+    [68.2, "I fall into secret feelings,"],
+    [74.8, "Burning forests in my head"],
+    [79.0, "I want to sing —"],
+    [81.8, "But the words stay silent"],
+    [88.2, "Till the morning comes."],
+    [91.8, "As long as the candle’s burning,"],
+    [98.2, "I disappear."],
+    [104.8, "As long as the candle’s burning"],
+    [111.2, "I’m still here."],
+    [115.2, ""],
+    [132.4, "I walk a labyrinth with no walls,"],
+    [139.6, "Every answer sounds the same"],
+    [146.8, "I hum a melody"],
+    [153.0, "So I don’t fade away."],
+    [157.8, ""],
+    [173.0, "As long as the candle’s burning,"],
+    [179.4, "I disappear."],
+    [186.0, "As long as the candle’s burning"],
+    [192.4, "I’m still here."],
+    [196.4, ""],
+    [212.0, "As long as the candle’s burning,"],
+    [218.2, "I disappear."],
+    [224.8, "As long as the candle’s burning"],
+    [231.2, "I’m still here."],
+    [235.2, ""],
+  ],
+};
+
+/* One song → one state of the circle: palette, material, motion, typography */
+const STATES = [
+  { name: 'Clay', line: 'Clay — warm, slow, close.', bg: '#E9E3D8', fg: '#161412', accent: '#E0217A', w: [1, 0, 0] },
+  { name: 'Ink',  line: 'Ink — dark, glossy, nocturnal.', bg: '#0E0D0C', fg: '#ECE6DB', accent: '#E0217A', w: [0, 1, 0] },
+  { name: 'Milk', line: 'Milk — open air, cold light.', bg: '#2531CF', fg: '#F1ECE3', accent: '#E0217A', w: [0, 0, 1] },
+];
+const ROMAN = ['I', 'II', 'III'];
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const TAU = Math.PI * 2;
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const damp = (a, b, k, dt) => lerp(a, b, 1 - Math.exp(-k * dt));
+const smooth = t => t * t * (3 - 2 * t);
+const pad = n => String(n).padStart(2, '0');
+const fmt = s => (!isFinite(s) || s < 0) ? '—' : `${Math.floor(s / 60)}:${pad(Math.floor(s % 60))}`;
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
+const mqFine = matchMedia('(hover: hover) and (pointer: fine)');
+const mqMobile = matchMedia('(max-width: 600px)');
+const reduced = () => mqReduce.matches;
+
+/* Device class (phone / tablet / desk) and a viewport height that ignores the mobile
+   address bar sliding in and out — the object must not jump when it does. */
+const Device = {
+  kind: 'desk', portrait: false,
+  detect() {
+    const w = innerWidth, h = innerHeight, s = Math.min(w, h);
+    const coarse = matchMedia('(pointer: coarse)').matches || !matchMedia('(hover: hover)').matches;
+    const kind = (w <= 600 || (coarse && s < 600)) ? 'phone' : coarse ? 'tablet' : 'desk';
+    const root = document.documentElement;
+    root.classList.remove('is-phone', 'is-tablet', 'is-desk', 'is-portrait', 'is-landscape');
+    root.classList.add('is-' + kind, h > w ? 'is-portrait' : 'is-landscape');
+    this.kind = kind; this.portrait = h > w;
+  },
+  get phone() { return this.kind === 'phone'; },
+  get tablet() { return this.kind === 'tablet'; },
+  get touch() { return this.kind !== 'desk'; },
+};
+Device.detect();
+const View = {
+  w: innerWidth, h: innerHeight,
+  init() {
+    this.probe = document.createElement('div');
+    this.probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;visibility:hidden;pointer-events:none';
+    if (window.CSS && CSS.supports('height', '100lvh')) this.probe.style.height = '100lvh';
+    document.body.appendChild(this.probe);
+    this.measure(true);
+    addEventListener('resize', () => this.measure());
+    addEventListener('orientationchange', () => setTimeout(() => this.measure(true), 250));
+  },
+  measure(force) {
+    const w = innerWidth, h = this.probe.offsetHeight || innerHeight;
+    // on touch screens only a real change (rotation, split view) counts — not the address bar
+    if (force || !Device.touch || w !== this.w || Math.abs(h - this.h) > 160) {
+      const changed = w !== this.w || h !== this.h;
+      this.w = w; this.h = h;
+      Device.detect();
+      if (changed || force) emit('view');
+    }
+  },
+};
+const store = {
+  get(k, d = null) { try { const v = localStorage.getItem('enso:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('enso:' + k, JSON.stringify(v)); } catch { /* unavailable */ } },
+};
+const buzz = ms => { try { if (Device.touch && navigator.vibrate) navigator.vibrate(ms); } catch { /* unsupported */ } };
+const bus = new EventTarget();
+const emit = (n, d) => bus.dispatchEvent(new CustomEvent(n, { detail: d }));
+const on = (n, f) => bus.addEventListener(n, e => f(e.detail));
+
+function canvasHost(cv) {
+  const h = { cv, ctx: cv.getContext('2d'), visible: false, dpr: 1, cw: 1, ch: 1 };
+  const fit = () => {
+    const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    const w = Math.max(1, Math.round(r.width * dpr)), hh = Math.max(1, Math.round(r.height * dpr));
+    if (cv.width !== w || cv.height !== hh) { cv.width = w; cv.height = hh; }
+    Object.assign(h, { dpr, cw: r.width, ch: r.height });
+  };
+  new ResizeObserver(fit).observe(cv);
+  new IntersectionObserver(([e]) => { h.visible = e.isIntersecting; }).observe(cv);
+  fit();
+  return h;
+}
+
+/* split text into per-letter spans: <span class="cls"><span>x</span></span> */
+function letters(el, text, cls, inner = true) {
+  el.textContent = '';
+  const out = [];
+  [...text].forEach((ch, i) => {
+    const s = document.createElement('span');
+    s.className = cls;
+    s.style.setProperty('--i', i);
+    const c = ch === ' ' ? ' ' : ch;
+    if (inner) { const t = document.createElement('span'); t.textContent = c; s.appendChild(t); } else s.textContent = c;
+    el.appendChild(s);
+    out.push(s);
+  });
+  return out;
+}
+
+/* ==========================================================================
+   Loop + pointer
+   ========================================================================== */
+const Ticker = (() => {
+  const subs = new Set();
+  let last = performance.now(), time = 0;
+  const frame = now => {
+    const dt = Math.min(.064, (now - last) / 1000);
+    last = now; time += dt;
+    for (const f of subs) { try { f(dt, time); } catch (e) { console.error(e); subs.delete(f); } }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+  return { add: f => (subs.add(f), () => subs.delete(f)) };
+})();
+
+const Pointer = { x: innerWidth / 2, y: innerHeight / 2, sx: innerWidth / 2, sy: innerHeight / 2, vx: 0, active: false };
+addEventListener('pointermove', e => { Pointer.vx = e.clientX - Pointer.x; Pointer.x = e.clientX; Pointer.y = e.clientY; Pointer.active = true; }, { passive: true });
+addEventListener('pointerdown', e => { Pointer.x = e.clientX; Pointer.y = e.clientY; Pointer.active = true; }, { passive: true });
+addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') Pointer.active = false; }, { passive: true });
+document.addEventListener('mouseout', e => { if (!e.relatedTarget) Pointer.active = false; });
+Ticker.add(dt => { Pointer.sx = damp(Pointer.sx, Pointer.x, 8, dt); Pointer.sy = damp(Pointer.sy, Pointer.y, 8, dt); Pointer.vx = damp(Pointer.vx, 0, 8, dt); });
+
+/* ==========================================================================
+   ID3v2 — song titles and cover art straight from the audio files
+   ========================================================================== */
+function parseID3(buf) {
+  const b = new Uint8Array(buf);
+  if (b.length < 10 || b[0] !== 0x49 || b[1] !== 0x44 || b[2] !== 0x33) return {};
+  const ver = b[3];
+  if (ver < 3) return {};
+  const syncsafe = o => (b[o] << 21) | (b[o + 1] << 14) | (b[o + 2] << 7) | b[o + 3];
+  const u32 = o => ((b[o] << 24) >>> 0) + (b[o + 1] << 16) + (b[o + 2] << 8) + b[o + 3];
+  const end = Math.min(b.length, 10 + syncsafe(6));
+  let p = 10;
+  if (b[5] & 0x40) p += ver === 4 ? syncsafe(10) : u32(10) + 4;
+  const text = d => {
+    const enc = d[0]; let body = d.subarray(1), label = 'latin1';
+    if (enc === 1) {
+      if (body[0] === 0xfe && body[1] === 0xff) { label = 'utf-16be'; body = body.subarray(2); }
+      else { label = 'utf-16le'; if (body[0] === 0xff && body[1] === 0xfe) body = body.subarray(2); }
+    } else if (enc === 2) label = 'utf-16be';
+    else if (enc === 3) label = 'utf-8';
+    try { return new TextDecoder(label).decode(body).replace(/\u0000/g, '').trim(); } catch { return ''; }
+  };
+  const out = {};
+  while (p + 10 <= end) {
+    const id = String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3]);
+    if (!/^[A-Z0-9]{4}$/.test(id)) break;
+    const size = ver === 4 ? syncsafe(p + 4) : u32(p + 4);
+    const ds = p + 10, de = ds + size;
+    if (size <= 0 || de > end) break;
+    if (id === 'TIT2') out.title = text(b.subarray(ds, de));
+    else if (id === 'TPE1') out.artist = text(b.subarray(ds, de));
+    else if (id === 'APIC' && !out.picture) {
+      const enc = b[ds]; let q = ds + 1, mime = '';
+      while (q < de && b[q] !== 0) mime += String.fromCharCode(b[q++]);
+      q += 2;
+      if (enc === 0 || enc === 3) { while (q < de && b[q] !== 0) q++; q += 1; }
+      else { while (q + 1 < de && !(b[q] === 0 && b[q + 1] === 0)) q += 2; q += 2; }
+      if (q < de) out.picture = new Blob([b.slice(q, de)], { type: /^image\//.test(mime) ? mime : 'image/jpeg' });
+    }
+    p = de;
+  }
+  return out;
+}
+
+/* ==========================================================================
+   Audio engine
+   graph mode: <audio crossorigin> → analyser → gain (real reactive visuals)
+   plain mode: fallback when the CDN refuses CORS — music still plays and the
+               visuals are driven by an approximation
+   ========================================================================== */
+const PEAKS_N = 400;
+const Engine = {
+  tracks: CONFIG.tracks.map((t, i) => ({
+    ...t, i, share: `https://suno.com/s/${t.code}`, lyrics: LYRICS[t.code] || null,
+    blobUrl: '', coverBlob: '', metaTitle: store.get('title:' + t.code, ''), fileName: '',
+    duration: NaN, peaks: null, peaksKind: '', peaksTried: false, tagTried: false, plainOnly: false, failed: false,
+  })),
+  index: 0, loaded: -1, ctx: null, analyser: null, node: null, gain: null, mode: 'graph',
+  freq: new Uint8Array(1024), wave: new Uint8Array(2048).fill(128),
+  level: 0, bass: 0, mid: 0, high: 0, beat: 0, beats: 0, _bassAvg: 0, _lastBeat: -1,
+  synthetic: false, volume: clamp(Number(store.get('vol', .85)) || .85), muted: false,
+  started: false, wantPlay: false, status: 'idle', _pending: null,
+
+  init() { this.elG = this._make(true); this.elP = this._make(false); this.el = this.elG; },
+  _make(cors) {
+    const a = new Audio();
+    if (cors) a.crossOrigin = 'anonymous';
+    a.preload = 'metadata';
+    const live = () => a === this.el;
+    a.addEventListener('loadedmetadata', () => {
+      if (!live()) return;
+      const t = this.tracks[this.loaded];
+      if (t && isFinite(a.duration)) t.duration = a.duration;
+      if (this._pending != null && isFinite(a.duration)) { a.currentTime = this._pending * a.duration; this._pending = null; }
+      emit('meta', t);
+    });
+    a.addEventListener('play', () => { if (live()) { this.started = true; this._set('playing'); } });
+    a.addEventListener('playing', () => { if (live()) this._set('playing'); });
+    a.addEventListener('waiting', () => { if (live()) this._set('loading'); });
+    a.addEventListener('pause', () => { if (live() && !a.ended) this._set('paused'); });
+    a.addEventListener('ended', () => { if (live()) { this._set('ended'); this._onEnded(); } });
+    a.addEventListener('error', () => { if (live() && a.getAttribute('src')) this._onError(a); });
+    return a;
+  },
+  _set(s) { this.status = s; emit('state', s); },
+  get cur() { return this.tracks[this.index]; },
+  /* where a song can come from, in order: a dropped file, the repo file, Suno's CDN */
+  sources(t) { return [t.blobUrl, ...[].concat(t.src || []), t.songId ? `https://cdn1.suno.ai/${t.songId}.mp3` : ''].filter(Boolean); },
+  srcOf(t) { return this.sources(t)[t.alt || 0] || ''; },
+  /* current source is unusable — move on to the next one; false when none are left */
+  nextSource(t) {
+    if ((t.alt || 0) + 1 >= this.sources(t).length) return false;
+    t.alt = (t.alt || 0) + 1;
+    Object.assign(t, { plainOnly: false, peaks: null, peaksKind: '', peaksTried: false, tagTried: false });
+    return true;
+  },
+  coverOf(t) { return t.coverBlob || t.cover || (t.songId ? `https://cdn2.suno.ai/image_${t.songId}.jpeg` : ''); },
+  titleOf(t) { return t.title || t.metaTitle || `Track ${pad(t.i + 1)}`; },
+  has(i) { const t = this.tracks[i]; return !!this.srcOf(t) && !t.failed; },
+
+  unlock() {
+    try {
+      if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; this.ctx = new AC(); }
+      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    } catch { /* no Web Audio — plain playback still works */ }
+  },
+  _graph() {
+    if (this.node) return true;
+    if (!this.ctx) return false;
+    try {
+      this.node = this.ctx.createMediaElementSource(this.elG);
+      this.analyser = this.ctx.createAnalyser();
+      this.analyser.fftSize = 2048;
+      this.analyser.smoothingTimeConstant = .8;
+      this.gain = this.ctx.createGain();
+      this.node.connect(this.analyser); this.analyser.connect(this.gain); this.gain.connect(this.ctx.destination);
+      this._applyVol();
+      return true;
+    } catch { return false; }
+  },
+  _attach(t, play) {
+    const url = this.srcOf(t);
+    if (!url) return false;
+    this.elG.pause(); this.elP.pause();
+    const plain = t.plainOnly || !this.ctx;
+    const el = plain ? this.elP : this.elG, other = plain ? this.elG : this.elP;
+    this.el = el; this.mode = plain ? 'plain' : 'graph'; this.loaded = t.i;
+    if (other.getAttribute('src')) { other.removeAttribute('src'); other.load(); }
+    if (!plain) this._graph();
+    this._applyVol();
+    if (el.getAttribute('src') !== url) el.src = url;
+    this._set(play ? 'loading' : 'ready');
+    if (play) this._go();
+    return true;
+  },
+  _go() {
+    this.wantPlay = true;
+    Preview.stop(true);
+    this.unlock();
+    const p = this.el.play();
+    if (p && p.catch) p.catch(err => {
+      const n = err && err.name;
+      if (n === 'AbortError' || n === 'NotSupportedError') return;
+      this.wantPlay = false; this._set('paused');
+      if (n === 'NotAllowedError') emit('toast', 'The browser blocked playback — press play once more');
+    });
+  },
+  _onError(a) {
+    const t = this.tracks[this.loaded];
+    if (!t) return;
+    if (a === this.elG && !t.plainOnly) { t.plainOnly = true; this._attach(t, this.wantPlay); return; }
+    if (this.nextSource(t)) { this._attach(t, this.wantPlay); if (t.i === this.index) this.decodePeaks(t); return; }
+    t.failed = true; this.wantPlay = false; this._set('error');
+    emit('toast', `${this.titleOf(t)} couldn't be loaded here — it's still on Suno`);
+    emit('source', t);
+  },
+  _onEnded() {
+    const n = this.tracks.length;
+    for (let k = 1; k <= n; k++) {
+      const j = (this.index + k) % n;
+      if (!this.has(j)) continue;
+      if (j === this.index) { this.el.currentTime = 0; return; }
+      this.select(j, true); return;
+    }
+  },
+  play() {
+    const t = this.cur;
+    if (!this.has(this.index)) { emit('offline', t); return false; }
+    this.unlock();
+    if (this.loaded !== this.index || (this.mode === 'plain' && !t.plainOnly && this.ctx)) this._attach(t, true);
+    else this._go();
+    return true;
+  },
+  pause() { this.wantPlay = false; this.el.pause(); },
+  toggle() { if (this.playing) { this.pause(); return false; } return this.play(); },
+  get playing() { return this.loaded === this.index && !this.el.paused && !this.el.ended; },
+  get begun() { return this.loaded === this.index && (this.playing || this.el.currentTime > .05); },
+  select(i, autoplay) {
+    const n = this.tracks.length;
+    i = ((i % n) + n) % n;
+    const was = this.playing, prev = this.index;
+    if (i !== prev) { this.pause(); this.index = i; emit('track', { i, prev }); }
+    const go = autoplay === undefined ? was : autoplay;
+    if (go) this.play();
+    else if (this.has(i) && this.loaded !== i && this.ctx) this._attach(this.tracks[i], false);
+  },
+  get time() { return this.loaded === this.index ? (this.el.currentTime || 0) : 0; },
+  get duration() { return (this.loaded === this.index && isFinite(this.el.duration)) ? this.el.duration : this.cur.duration; },
+  get ratio() { const d = this.duration; return (isFinite(d) && d > 0) ? clamp(this.time / d) : 0; },
+  seekRatio(r) {
+    r = clamp(r);
+    if (!this.has(this.index)) return false;
+    if (this.loaded !== this.index) { this.unlock(); this._pending = r; this._attach(this.cur, false); return true; }
+    const d = this.duration;
+    if (isFinite(d) && d > 0) this.el.currentTime = r * d; else this._pending = r;
+    return true;
+  },
+  seekBy(s) { const d = this.duration; if (isFinite(d) && d > 0) this.seekRatio((this.time + s) / d); },
+  setVolume(v) { this.volume = clamp(v); if (this.volume > 0) this.muted = false; this._applyVol(); store.set('vol', this.volume); },
+  toggleMute() { this.muted = !this.muted; this._applyVol(); },
+  _applyVol() {
+    const v = this.muted ? 0 : this.volume;
+    if (this.gain) { this.gain.gain.value = v; this.elG.volume = 1; } else this.elG.volume = v;
+    this.elG.muted = this.muted;
+    this.elP.volume = v; this.elP.muted = this.muted;
+    emit('volume');
+  },
+
+  analyse(dt, time) {
+    const F = this.freq, W = this.wave, playing = this.playing;
+    if (playing && this.mode === 'graph' && this.analyser && this.ctx.state === 'running') {
+      this.analyser.getByteFrequencyData(F); this.analyser.getByteTimeDomainData(W); this.synthetic = false;
+    } else if (playing) { this._synth(time); this.synthetic = true; }
+    else { for (let i = 0; i < F.length; i++) F[i] *= .9; for (let i = 0; i < W.length; i++) W[i] = 128 + (W[i] - 128) * .85; }
+    let b = 0, m = 0, h = 0;
+    for (let i = 1; i < 12; i++) b += F[i];
+    for (let i = 12; i < 110; i++) m += F[i];
+    for (let i = 110; i < 420; i++) h += F[i];
+    b /= 11 * 255; m /= 98 * 255; h /= 310 * 255;
+    let s = 0;
+    for (let i = 0; i < W.length; i += 4) { const v = (W[i] - 128) / 128; s += v * v; }
+    const rms = Math.sqrt(s / (W.length / 4));
+    this.bass = damp(this.bass, b, 16, dt); this.mid = damp(this.mid, m, 16, dt); this.high = damp(this.high, h, 16, dt);
+    this.level = damp(this.level, Math.min(1, rms * 2.6), 14, dt);
+    this._bassAvg = damp(this._bassAvg, b, 2.5, dt);
+    if (playing && b > this._bassAvg * 1.25 && b > .3 && time - this._lastBeat > .28) { this.beat = 1; this.beats++; this._lastBeat = time; }
+    this.beat = damp(this.beat, 0, 7, dt);
+    const t = this.cur;
+    if (playing && !this.synthetic && t.peaksKind === 'live' && t.peaks) {
+      const d = this.duration;
+      if (isFinite(d) && d > 0) {
+        const k = Math.min(PEAKS_N - 1, Math.floor(this.time / d * PEAKS_N));
+        const v = Math.min(1, rms * 3.2);
+        if (v > t.peaks[k]) t.peaks[k] = v;
+      }
+    }
+  },
+  _synth(t) {
+    const F = this.freq, W = this.wave;
+    const n2 = (x, y) => Math.sin(x * 1.7 + y) * Math.sin(x * .63 - y * 1.3);
+    const kick = Math.pow(Math.max(0, Math.sin(t * TAU * (112 / 60) / 2)), 12);
+    const sway = .6 + .4 * Math.sin(t * .37);
+    for (let i = 0; i < F.length; i++) {
+      let v = 255 * Math.exp(-i / 150) * (.45 + .4 * n2(i * .05, t * 1.6)) * sway;
+      if (i < 14) v = Math.max(v, 255 * kick * (1 - i / 14) * .95);
+      F[i] = clamp(v, 0, 255);
+    }
+    for (let i = 0; i < W.length; i++) {
+      const x = i / W.length;
+      W[i] = 128 + clamp(Math.sin(x * TAU * 3 + t * 7) * .25 * sway + kick * .35 * Math.sin(x * TAU * 1.5), -1, 1) * 110;
+    }
+  },
+
+  _applyTag(t, tag) {
+    let changed = false;
+    if (tag.title && !t.title && tag.title !== t.metaTitle) { t.metaTitle = tag.title; store.set('title:' + t.code, tag.title); changed = true; }
+    if (tag.picture && !t.coverBlob && t.blobUrl) { t.coverBlob = URL.createObjectURL(tag.picture); changed = true; }
+    if (changed) emit('source', t);
+  },
+  /* small ranged read: just enough of the file for its ID3 title */
+  async readTag(t) {
+    if (t.tagTried || t.blobUrl || !this.srcOf(t)) return;
+    t.tagTried = true;
+    try {
+      const res = await fetch(this.srcOf(t), { mode: 'cors', headers: { Range: 'bytes=0-131071' } });
+      if (!res.ok) return;
+      const buf = await res.arrayBuffer();
+      this._applyTag(t, parseID3(buf));
+    } catch { /* CDN without CORS — titles stay neutral */ }
+  },
+  async decodePeaks(t, buffer) {
+    if (t.peaksKind === 'decoded') return;
+    if (!t.peaks) { t.peaks = new Float32Array(PEAKS_N); t.peaksKind = 'live'; }
+    if (!buffer) {
+      if (t.peaksTried) return;
+      t.peaksTried = true;
+      const url = this.srcOf(t);
+      if (!url) return;
+      try { const res = await fetch(url, { mode: 'cors' }); if (!res.ok) return; buffer = await res.arrayBuffer(); }
+      catch { return; } // waveform will draw itself while playing
+      t.tagTried = true;
+      this._applyTag(t, parseID3(buffer));
+    }
+    try {
+      const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if (!OAC) return;
+      const ac = new OAC(1, 2, 44100);
+      const audio = await new Promise((res, rej) => { const p = ac.decodeAudioData(buffer, res, rej); if (p && p.then) p.then(res, rej); });
+      const ch = audio.getChannelData(0), block = Math.max(1, Math.floor(ch.length / PEAKS_N));
+      const out = new Float32Array(PEAKS_N);
+      let max = 0;
+      for (let i = 0; i < PEAKS_N; i++) {
+        let s = 0, n = 0;
+        for (let j = i * block, e = Math.min(ch.length, j + block); j < e; j += 16) { s += ch[j] * ch[j]; n++; }
+        out[i] = Math.sqrt(s / Math.max(1, n)); if (out[i] > max) max = out[i];
+      }
+      for (let i = 0; i < PEAKS_N; i++) out[i] = max ? Math.pow(out[i] / max, .8) : 0;
+      t.peaks = out; t.peaksKind = 'decoded';
+      if (!isFinite(t.duration)) t.duration = audio.duration;
+      emit('meta', t);
+    } catch { /* keep live peaks */ }
+  },
+  async loadFile(i, file, autoplay = true) {
+    if (!file) return;
+    if (!/^audio\//.test(file.type) && !/\.(mp3|wav|m4a|aac|ogg|oga|opus|flac|webm)$/i.test(file.name)) { emit('toast', `“${file.name}” isn't an audio file`); return; }
+    const t = this.tracks[i];
+    if (t.blobUrl) URL.revokeObjectURL(t.blobUrl);
+    if (t.coverBlob) URL.revokeObjectURL(t.coverBlob);
+    Object.assign(t, { alt: 0, blobUrl: URL.createObjectURL(file), coverBlob: '', fileName: file.name, failed: false, plainOnly: false, peaks: null, peaksKind: '', peaksTried: true, duration: NaN });
+    let buf = null;
+    try { buf = await file.arrayBuffer(); } catch { /* unreadable */ }
+    if (buf) {
+      const tag = parseID3(buf);
+      t.metaTitle = tag.title || '';
+      if (tag.picture) t.coverBlob = URL.createObjectURL(tag.picture);
+    }
+    if (this.loaded === i) { this.pause(); this.loaded = -1; }
+    emit('source', t);
+    emit('toast', `Playing ${this.titleOf(t)} from your file`);
+    if (autoplay) this.select(i, true);
+    if (buf) this.decodePeaks(t, buf);
+  },
+  preloadDurations() {
+    this.tracks.forEach((t, i) => {
+      if (!this.has(i) || isFinite(t.duration)) return;
+      const a = new Audio();
+      a.preload = 'metadata';
+      const done = () => { a.removeAttribute('src'); a.load(); };
+      a.addEventListener('loadedmetadata', () => { if (isFinite(a.duration)) { t.duration = a.duration; emit('meta', t); } done(); }, { once: true });
+      a.addEventListener('error', () => {
+        if (!a.getAttribute('src')) return;
+        done();
+        if (this.loaded === i) return; // the main player handles its own fallbacks
+        if (this.nextSource(t)) { a.src = this.srcOf(t); a.load(); return; }
+        t.failed = true; emit('source', t);
+      });
+      a.src = this.srcOf(t);
+    });
+  },
+};
+Engine.init();
+Ticker.add((dt, t) => Engine.analyse(dt, t));
+
+/* hover preview: a quiet second voice, never touches the main player */
+const Preview = {
+  el: null, target: 0, timer: 0, item: null,
+  start(i, item) {
+    if (!Engine.ctx || !mqFine.matches || Engine.playing || !Engine.has(i)) return;
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      if (Engine.playing) return;
+      if (!this.el) { this.el = new Audio(); this.el.preload = 'metadata'; }
+      const el = this.el, url = Engine.srcOf(Engine.tracks[i]);
+      this.item = item; item.classList.add('is-preview');
+      const go = () => {
+        if (isFinite(el.duration)) el.currentTime = el.duration * .35;
+        el.volume = 0; el.play().catch(() => {});
+        this.target = Engine.muted ? 0 : .5 * Engine.volume;
+      };
+      if (el.getAttribute('src') !== url) { el.src = url; el.addEventListener('loadedmetadata', go, { once: true }); } else go();
+    }, 500);
+  },
+  stop(hard) {
+    clearTimeout(this.timer); this.target = 0;
+    if (this.item) { this.item.classList.remove('is-preview'); this.item = null; }
+    if (hard && this.el) { this.el.pause(); this.el.volume = 0; }
+  },
+};
+Ticker.add(dt => {
+  const el = Preview.el;
+  if (!el || el.paused) return;
+  el.volume = clamp(damp(el.volume, Preview.target, 5, dt));
+  if (Preview.target === 0 && el.volume < .01) el.pause();
+});
+
+const Toast = {
+  root: $('#toasts'),
+  show(msg, ms = 3600) {
+    const el = document.createElement('div');
+    el.className = 'toast'; el.textContent = msg;
+    this.root.appendChild(el);
+    while (this.root.children.length > 2) this.root.firstElementChild.remove();
+    setTimeout(() => { el.classList.add('is-out'); setTimeout(() => el.remove(), 460); }, ms);
+  },
+};
+on('toast', m => Toast.show(m));
+
+/* ==========================================================================
+   Theme — the page is always in the colours of the current state;
+   some sections invert it for rhythm
+   ========================================================================== */
+const Theme = {
+  state: 0, inverted: false, _t: 0, root: document.documentElement, meta: $('meta[name="theme-color"]'),
+  colors(state = this.state, inv = this.inverted) {
+    const s = STATES[state];
+    return inv ? { bg: s.fg, fg: s.bg, accent: s.accent } : { bg: s.bg, fg: s.fg, accent: s.accent };
+  },
+  apply({ bg, fg, accent }, parts = 'all') {
+    const st = this.root.style;
+    if (parts !== 'bg') { st.setProperty('--fg', fg); st.setProperty('--accent', accent); }
+    if (parts !== 'fg') { st.setProperty('--bg', bg); this.meta.setAttribute('content', bg); }
+  },
+  setInverted(v) { if (v === this.inverted) return; this.inverted = v; this.apply(this.colors()); },
+  setState(i, origin) {
+    if (i === this.state) return;
+    this.state = i;
+    const c = this.colors();
+    const wipe = $('#wipe');
+    clearTimeout(this._t);
+    if (reduced() || !origin) { this.apply(c); return; }
+    wipe.classList.remove('is-run');
+    wipe.style.background = c.bg;
+    wipe.style.setProperty('--wx', origin.x + 'px');
+    wipe.style.setProperty('--wy', origin.y + 'px');
+    void wipe.offsetWidth;
+    wipe.classList.add('is-run');
+    this.apply(c, 'fg');
+    this._t = setTimeout(() => {
+      this.root.classList.add('bg-instant');
+      this.apply(this.colors(), 'bg');
+      requestAnimationFrame(() => requestAnimationFrame(() => { this.root.classList.remove('bg-instant'); wipe.classList.remove('is-run'); }));
+    }, 1000);
+  },
+};
+
+/* ==========================================================================
+   Scroll — active section, the object's choreography between sections
+   ========================================================================== */
+/* [x, y, scale, visible] per section. On desktop the circle travels between sections;
+   on phones and upright tablets it only lives in the hero and the player, and fades
+   rather than flies when you scroll between them. */
+const POSES = {
+  desk: { hero: [.3, .02, .82, 1], about: [-.74, -.04, .62, 1], tracks: [0, .035, .62, 1], listen: [.6, -.1, .55, 1], foot: [.6, -.24, .45, 1] },
+  phone: { hero: [0, .135, .56, 1], about: [0, .135, .56, 0], tracks: [0, .045, .47, 1], listen: [0, .045, .47, 0], foot: [0, .045, .47, 0] },
+  tabletP: { hero: [0, .1, .6, 1], about: [0, .1, .6, 0], tracks: [0, .04, .52, 1], listen: [0, .04, .52, 0], foot: [0, .04, .52, 0] },
+};
+const poseSet = () => Device.phone ? POSES.phone : (Device.tablet && Device.portrait) ? POSES.tabletP : POSES.desk;
+const Scroll = {
+  active: 'hero', sections: [],
+  init() {
+    this.sections = $$('[data-section]');
+    $('#to-top').addEventListener('click', () => scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' }));
+    Ticker.add(() => this.frame());
+  },
+  frame() {
+    const vh = View.h, y = scrollY, set = poseSet();
+    const anchors = this.sections.map(s => {
+      const r = s.getBoundingClientRect();
+      return { name: s.dataset.section, a: Math.max(0, r.top + y - Math.max(0, (vh - r.height) / 2)), top: r.top, bottom: r.bottom, el: s };
+    });
+    // active section = the one under the middle of the viewport
+    let act = anchors[0];
+    for (const a of anchors) if (a.top <= innerHeight * .5) act = a;
+    if (act.name !== this.active) {
+      this.active = act.name;
+      Theme.setInverted(act.el.hasAttribute('data-invert'));
+    }
+    // pose: interpolate between neighbouring anchors
+    let i = 0;
+    while (i < anchors.length - 1 && y >= anchors[i + 1].a) i++;
+    const A = anchors[i], B = anchors[Math.min(i + 1, anchors.length - 1)];
+    const t = B === A ? 0 : smooth(clamp((y - A.a) / Math.max(1, B.a - A.a)));
+    const pa = set[A.name], pb = set[B.name];
+    if (pa[3] && pb[3]) {
+      Orb.target = [lerp(pa[0], pb[0], t), lerp(pa[1], pb[1], t), lerp(pa[2], pb[2], t)];
+      Orb.targetVis = 1;
+    } else {
+      // one side is hidden: stay where the visible one is, and fade instead of travelling
+      const showB = pb[3] > pa[3];
+      Orb.target = (showB ? pb : pa).slice(0, 3);
+      Orb.targetVis = showB ? smooth(clamp((t - .45) / .45)) : (pa[3] ? 1 - smooth(clamp(t / .45)) : 0);
+    }
+  },
+};
+
+/* ==========================================================================
+   The object — an ensō made of dust. Thousands of particles follow one brush
+   stroke; the song paints them as it plays, and the circle closes at the end.
+   ========================================================================== */
+const DUST_VERT = `
+attribute vec4 aP;      // u along the stroke, radial spread, depth spread, size/brightness
+attribute float aPh;    // phase
+uniform vec2 uRes; uniform vec2 uC; uniform float uR; uniform float uArc; uniform float uProg;
+uniform float uTime; uniform vec3 uW; uniform vec4 uAud; uniform float uBeat;
+uniform vec2 uRot; uniform vec3 uMouse; uniform float uPx; uniform float uAlpha;
+uniform float uDark;   // 0 on a light page, 1 on a dark one — eased, so the dust re-tones slowly
+varying vec4 vCol;
+const vec3 CLAY = vec3(0.878, 0.129, 0.478);
+const vec3 INKD = vec3(0.086, 0.078, 0.071);
+const vec3 BONE = vec3(0.93, 0.9, 0.86);
+const vec3 GRAY = vec3(0.55, 0.52, 0.48);
+const vec3 SKY = vec3(0.52, 0.6, 1.0);
+const vec3 BLUE = vec3(0.145, 0.192, 0.812);
+const vec3 ASH = vec3(0.68, 0.66, 0.62);
+void main() {
+  float u = aP.x, a = aP.y, b = aP.z, z = aP.w, t = uTime;
+  float th = u * uArc * 6.28318;
+  float w = (1.15 - 0.8 * pow(u, 1.2)) * uR * 0.16 * (1.0 + uAud.w * 1.1);
+  float scat = 1.0 + uBeat * 0.7 * z + uAud.x * 0.6;
+  // each state moves differently: clay drifts like sand, ink glitters and swirls, milk folds into pleats
+  float grain = sin(aPh * 3.0 + t * 0.4) * 0.12 * uW.x;
+  float swirl = sin(t * 0.6 + aPh + u * 12.0) * uW.y;
+  float pleat = sin(u * 46.0 - t * 2.4) * (0.1 + uAud.z * 0.55) * uW.z;
+  float rad = uR + (a * scat + pleat + grain) * w;
+  vec3 p = vec3(sin(th) * rad, cos(th) * rad, b * w * 0.9);
+  p.xy += vec2(cos(aPh + t * (0.7 + uW.y)), sin(aPh * 1.3 + t * 0.8)) * (uAud.w * 14.0 * z + swirl * 2.5) * uPx;
+  float cx = cos(uRot.x), sx = sin(uRot.x), cy = cos(uRot.y), sy = sin(uRot.y);
+  p = vec3(p.x, p.y * cx - p.z * sx, p.y * sx + p.z * cx);
+  p = vec3(p.x * cy + p.z * sy, p.y, -p.x * sy + p.z * cy);
+  float persp = 1.0 / (1.0 - p.z / (uR * 5.0));
+  vec2 pix = uC + vec2(p.x, -p.y) * persp;
+  vec2 dm = pix - uMouse.xy;
+  float dl = length(dm), mr = uR * 0.45;
+  if (dl < mr) pix += dm / (dl + 0.001) * pow(1.0 - dl / mr, 2.0) * mr * 0.5 * uMouse.z;
+  gl_Position = vec4(pix.x / uRes.x * 2.0 - 1.0, 1.0 - pix.y / uRes.y * 2.0, 0.0, 1.0);
+  float played = step(u, uProg);
+  // played dust keeps the state colour; the rest is toned against whatever the page is now
+  vec3 cP = CLAY * uW.x + mix(INKD, BONE, uDark) * uW.y + mix(BLUE, BONE, uDark) * uW.z;
+  vec3 cU = mix(INKD, ASH, uDark) * uW.x + mix(vec3(0.45, 0.43, 0.4), GRAY, uDark) * uW.y + mix(vec3(0.42, 0.48, 0.95), SKY, uDark) * uW.z;
+  float twinkle = mix(1.0, 0.65 + 0.35 * sin(t * 4.0 + aPh * 7.0), uW.y);
+  vCol = vec4(mix(cU, cP, played), (0.35 + 0.65 * z) * mix(0.5 + 0.25 * uW.y + 0.15 * uDark * uW.x, 1.0, played) * twinkle * uAlpha);
+  gl_PointSize = (1.3 + z * 1.9) * uPx * persp * (1.0 + uAud.w * 0.4);
+}`;
+const DUST_FRAG = `
+precision mediump float;
+varying vec4 vCol;
+void main() {
+  float a = vCol.a * smoothstep(0.5, 0.22, length(gl_PointCoord - 0.5));
+  gl_FragColor = vec4(vCol.rgb * a, a);
+}`;
+
+const Orb = {
+  target: POSES.desk.hero, pose: [.3, .02, .82], arc: 0, prog: 1, introOn: false, intro: 0,
+  w: [1, 0, 0], spinX: 0, spinY: 0, vx: 0, vy: 0, drag: null, mouse: 0, q: 1, slow: 0, dark: 0, vis: 1, targetVis: 1,
+  init() {
+    this.cv = $('#gl');
+    this.count = Device.phone ? 7000 : Device.tablet ? 11000 : 16000;
+    this.data = this.makeDust(this.count);
+    const gl = this.cv.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' });
+    if (gl) this.gl = this.setupGL(gl);
+    if (!this.gl) { this.ctx2d = this.cv.getContext('2d'); this.count = Math.min(this.count, 5000); }
+    this.resize();
+    on('view', () => this.resize());
+    if (!Device.touch) this.initDrag();
+    Ticker.add((dt, t) => this.frame(dt, t));
+  },
+  /* u (biased toward the heavy start of the stroke), radial + depth spread, size, phase */
+  makeDust(n) {
+    const d = new Float32Array(n * 5);
+    const g = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+    for (let i = 0; i < n; i++) {
+      d.set([Math.pow(Math.random(), 1.2), g(), g(), Math.random(), Math.random() * TAU], i * 5);
+    }
+    return d;
+  },
+  setupGL(gl) {
+    const sh = (type, src) => {
+      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
+      return s;
+    };
+    const vs = sh(gl.VERTEX_SHADER, DUST_VERT), fs = sh(gl.FRAGMENT_SHADER, DUST_FRAG);
+    if (!vs || !fs) return null;
+    const pr = gl.createProgram();
+    gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(pr)); return null; }
+    gl.useProgram(pr);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, this.data, gl.STATIC_DRAW);
+    const aP = gl.getAttribLocation(pr, 'aP'), aPh = gl.getAttribLocation(pr, 'aPh');
+    gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 4, gl.FLOAT, false, 20, 0);
+    gl.enableVertexAttribArray(aPh); gl.vertexAttribPointer(aPh, 1, gl.FLOAT, false, 20, 16);
+    this.u = {};
+    ['uRes', 'uC', 'uR', 'uArc', 'uProg', 'uTime', 'uW', 'uAud', 'uBeat', 'uRot', 'uMouse', 'uPx', 'uAlpha', 'uDark'].forEach(n => { this.u[n] = gl.getUniformLocation(pr, n); });
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.clearColor(0, 0, 0, 0);
+    if (!this._ctxEvents) {
+      this._ctxEvents = true;
+      this.cv.addEventListener('webglcontextlost', e => { e.preventDefault(); this.lost = true; });
+      this.cv.addEventListener('webglcontextrestored', () => { this.lost = false; this.gl = this.setupGL(gl); });
+    }
+    return gl;
+  },
+  resize() {
+    const dpr = Math.min(Device.phone ? 1.75 : 2, devicePixelRatio || 1) * this.q;
+    this.cv.width = Math.max(2, Math.round(View.w * dpr));
+    this.cv.height = Math.max(2, Math.round(View.h * dpr));
+  },
+  /* screen-space circle of the object (CSS px) — also the play/scrub hit area */
+  get screen() {
+    const H = View.h;
+    // on narrow screens the circle is sized by the width so it never spills off the sides
+    const r = .62 * this.pose[2] * Math.min(H, View.w * (Device.touch ? 1.45 : 9)) * this.introScale;
+    return { x: View.w / 2 + this.pose[0] * H, y: H / 2 - this.pose[1] * H, r };
+  },
+  get introScale() { return .6 + .4 * smooth(this.intro); },
+  initDrag() {
+    const hero = $('#top');
+    hero.addEventListener('pointerdown', e => {
+      if (e.target.closest('a, button')) return;
+      const s = this.screen;
+      if (Math.hypot(e.clientX - s.x, e.clientY - s.y) > s.r * 1.25) return;
+      this.drag = { x: e.clientX, y: e.clientY, id: e.pointerId };
+      if (e.pointerType === 'mouse') hero.setPointerCapture(e.pointerId);
+    });
+    hero.addEventListener('pointermove', e => {
+      if (!this.drag || e.pointerId !== this.drag.id) return;
+      const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
+      this.drag.x = e.clientX; this.drag.y = e.clientY;
+      this.spinY += dx * .008; this.spinX += dy * .008;
+      this.vy = dx * .008 * 60; this.vx = dy * .008 * 60;
+    });
+    const end = () => { this.drag = null; };
+    hero.addEventListener('pointerup', end); hero.addEventListener('pointercancel', end);
+  },
+  frame(dt, t) {
+    if (this.introOn) this.intro = Math.min(1, this.intro + dt / (reduced() ? .3 : 2.4));
+    for (let k = 0; k < 3; k++) this.pose[k] = damp(this.pose[k], this.target[k], Device.touch ? 6 : 4.5, dt);
+    this.vis = damp(this.vis, this.targetVis, 6, dt);
+    const sw = STATES[Theme.state].w;
+    for (let k = 0; k < 3; k++) this.w[k] = damp(this.w[k], sw[k], 3.2, dt);
+    // how dark the page currently is — eased slower than the background for a filmic re-tone
+    const [br, bg, bb] = hexRgb(Theme.colors().bg);
+    this.dark = damp(this.dark, (.2126 * br + .7152 * bg + .0722 * bb) / 255 < .4 ? 1 : 0, 1.4, dt);
+    // the song paints the stroke as it plays; the circle closes at the very end
+    const scrub = States.scrubRatio;
+    const begun = Engine.begun || scrub != null;
+    const ratio = scrub != null ? scrub : Engine.ratio;
+    const target = !this.introOn ? 0 : begun ? .86 + .14 * ratio : .88;
+    this.arc = damp(this.arc, target, this.arc < .8 ? 1.8 : 6, dt);
+    this.prog = damp(this.prog, begun ? ratio : 1, scrub != null ? 30 : 6, dt);
+    // physics: spin with inertia, springs back to a calm tilt
+    if (!this.drag) {
+      this.spinY += this.vy * dt; this.spinX += this.vx * dt;
+      this.vy = damp(this.vy, 0, 2.2, dt); this.vx = damp(this.vx, 0, 2.2, dt);
+      this.spinY = damp(this.spinY, Math.round(this.spinY / TAU) * TAU, 1.4, dt);
+      this.spinX = damp(this.spinX, Math.round(this.spinX / TAU) * TAU, 1.4, dt);
+    }
+    const calm = Scroll.active === 'tracks' ? .3 : 1;
+    let rx, ry;
+    if (Device.touch) { // no cursor on touch screens: a slow, steady breath instead of following the finger
+      rx = .12 + Math.sin(t * .35) * .035;
+      ry = Math.sin(t * .27) * .07;
+    } else {
+      const px = (Pointer.sx / innerWidth - .5), py = (Pointer.sy / innerHeight - .5);
+      rx = (.18 + py * .3) * calm + this.spinX + Math.sin(t * .4) * .05 * calm;
+      ry = (-.22 + px * .45) * calm + this.spinY + Math.sin(t * .3) * .1 * calm;
+    }
+    this.mouse = damp(this.mouse, Pointer.active && mqFine.matches ? 1 : 0, 4, dt);
+    const alpha = smooth(clamp(this.intro * 3)) * this.vis;
+    if (this.gl && !this.lost) this.drawGL(t, rx, ry, alpha);
+    else if (this.ctx2d) this.draw2D(t, rx, ry, alpha);
+    // adaptive quality — keep it smooth on slower devices
+    this.slow = damp(this.slow, dt > 1 / 38 ? 1 : 0, 1, dt);
+    if (this.slow > .8 && this.q > .5 && t > 4) { this.q *= .8; this.slow = 0; this.resize(); }
+    this.drawnVisible = alpha > .02;
+  },
+  drawGL(t, rx, ry, alpha) {
+    const gl = this.gl, u = this.u, W = this.cv.width, H = this.cv.height, k = W / View.w, s = this.screen;
+    gl.viewport(0, 0, W, H);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    if (alpha <= 0) return;
+    gl.uniform2f(u.uRes, W, H);
+    gl.uniform2f(u.uC, s.x * k, s.y * k);
+    gl.uniform1f(u.uR, s.r * .8 * k);
+    gl.uniform1f(u.uArc, Math.max(.02, this.arc));
+    gl.uniform1f(u.uProg, this.prog);
+    gl.uniform1f(u.uTime, t);
+    gl.uniform3f(u.uW, this.w[0], this.w[1], this.w[2]);
+    gl.uniform4f(u.uAud, Engine.bass, Engine.mid, Engine.high, Engine.level);
+    gl.uniform1f(u.uBeat, Engine.beat);
+    gl.uniform2f(u.uRot, rx, ry);
+    gl.uniform3f(u.uMouse, Pointer.sx * k, Pointer.sy * k, this.mouse);
+    gl.uniform1f(u.uPx, k * Math.max(.75, Math.min(1.15, this.pose[2] / .62)));
+    gl.uniform1f(u.uAlpha, alpha);
+    gl.uniform1f(u.uDark, this.dark);
+    gl.drawArrays(gl.POINTS, 0, this.count);
+  },
+  /* fallback without WebGL: the same dust, fewer particles, flat */
+  draw2D(t, rx, ry, alpha) {
+    const c = this.ctx2d, W = this.cv.width, H = this.cv.height, k = W / View.w, s = this.screen, D = this.data;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, W, H);
+    if (alpha <= 0) return;
+    const R = s.r * .8 * k, cx = s.x * k, cy = s.y * k, tilt = Math.cos(rx);
+    const dk = this.dark > .5;
+    const played = this.w[0] > .5 ? '224,33,122' : dk ? '237,230,219' : this.w[1] > .5 ? '22,20,18' : '37,49,207';
+    const rest = this.w[0] > .5 ? (dk ? '153,148,140' : '22,20,18') : this.w[1] > .5 ? (dk ? '140,133,122' : '115,110,102') : (dk ? '133,153,255' : '107,122,242');
+    for (let i = 0; i < this.count; i++) {
+      const u = D[i * 5], a = D[i * 5 + 1], z = D[i * 5 + 3];
+      const th = u * this.arc * TAU, w = (1.15 - .8 * Math.pow(u, 1.2)) * R * .16 * (1 + Engine.level * 1.1);
+      const r = R + a * w * (1 + Engine.beat * .7 * z);
+      const p = u <= this.prog;
+      c.fillStyle = `rgba(${p ? played : rest},${((.35 + .65 * z) * (p ? 1 : .5) * alpha).toFixed(3)})`;
+      const sz = (1.3 + z * 1.9) * k;
+      c.fillRect(cx + Math.sin(th) * r, cy - Math.cos(th) * r * tilt, sz, sz);
+    }
+  },
+};
+
+/* ==========================================================================
+   Cursor + magnetic
+   ========================================================================== */
+const Cursor = {
+  dot: $('#cursor-dot'), disc: $('#cursor-disc'), el: $('#cursor'), target: null, dx: 0, dy: 0, ds: 0,
+  init() {
+    if (!mqFine.matches) return;
+    document.documentElement.classList.add('has-cursor');
+    document.addEventListener('pointerover', e => { this.target = e.target.closest ? e.target.closest('[data-cursor]') : null; });
+    addEventListener('pointerdown', () => this.el.classList.add('is-down'));
+    addEventListener('pointerup', () => this.el.classList.remove('is-down'));
+    Ticker.add(dt => this.frame(dt));
+  },
+  frame(dt) {
+    const t = this.target, c = this.el.classList;
+    let kind = t ? t.dataset.cursor : '', label = t ? (t.dataset.cursorLabel || '') : '';
+    if (!t && Scroll.active === 'hero' && !Loader.active) {
+      const s = Orb.screen;
+      if (Math.hypot(Pointer.x - s.x, Pointer.y - s.y) < s.r * 1.1) { kind = 'label'; label = Orb.drag ? 'spin' : 'drag'; }
+    }
+    c.toggle('is-link', kind === 'link');
+    c.toggle('is-hidden', kind === 'hide');
+    c.toggle('is-label', kind === 'label');
+    if (kind === 'label' && this.disc.textContent !== label) this.disc.textContent = label;
+    this.dx = damp(this.dx, Pointer.x, 14, dt); this.dy = damp(this.dy, Pointer.y, 14, dt);
+    this.ds = damp(this.ds, kind === 'label' ? 1 : 0, 10, dt);
+    this.dot.style.transform = `translate3d(${Pointer.x}px,${Pointer.y}px,0) scale(${(1 + Engine.level * .8).toFixed(3)})`;
+    this.disc.style.transform = `translate3d(${this.dx}px,${this.dy}px,0) scale(${this.ds.toFixed(3)})`;
+    this.el.style.opacity = Pointer.active ? 1 : 0;
+  },
+};
+const Magnetic = {
+  init() {
+    if (!mqFine.matches) return;
+    const items = $$('[data-magnetic]').map(el => ({ el, k: Number(el.dataset.magnetic) || 12, x: 0, y: 0 }));
+    Ticker.add(dt => items.forEach(m => {
+      const r = m.el.getBoundingClientRect();
+      const cx = r.left + r.width / 2 - m.x, cy = r.top + r.height / 2 - m.y;
+      const dx = Pointer.x - cx, dy = Pointer.y - cy, reach = r.width / 2 + 70, d = Math.hypot(dx, dy);
+      const f = Pointer.active && d < reach ? (1 - d / reach) : 0;
+      m.x = damp(m.x, dx * f * m.k / 40, 10, dt); m.y = damp(m.y, dy * f * m.k / 40, 10, dt);
+      m.el.style.translate = `${m.x.toFixed(2)}px ${m.y.toFixed(2)}px`;
+    }));
+  },
+};
+
+/* ==========================================================================
+   Loader
+   ========================================================================== */
+const Loader = {
+  active: true,
+  init() {
+    this.el = $('#loader'); this.num = $('#loader-num'); this.btn = $('#loader-enter');
+    const t0 = performance.now(), min = reduced() ? 300 : 1500;
+    let ready = 0;
+    (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { ready = 1; });
+    setTimeout(() => { ready = 1; }, 5000);
+    const step = () => {
+      const p = Math.min(clamp((performance.now() - t0) / min), .2 + ready * .8);
+      this.num.textContent = Math.round(smooth(p) * 100);
+      if (p >= 1) { this.el.classList.add('is-ready'); setTimeout(() => this.active && this.btn.focus({ preventScroll: true }), 500); return; }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    this.btn.addEventListener('click', () => this.enter());
+    this.el.addEventListener('keydown', e => { if (e.key === 'Tab') { e.preventDefault(); this.btn.focus(); } });
+  },
+  enter() {
+    if (!this.active) return;
+    this.active = false;
+    Engine.unlock();
+    scrollTo(0, 0);
+    if (Link.pending >= 0) {
+      Engine.select(Link.pending, true);
+      setTimeout(() => $('#tracks').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' }), reduced() ? 50 : 1400);
+    }
+    this.el.classList.add('is-leaving');
+    document.body.classList.remove('is-locked');
+    setTimeout(() => { document.documentElement.classList.add('is-entered'); Orb.introOn = true; }, reduced() ? 0 : 350);
+    setTimeout(() => { this.el.classList.add('is-gone'); this.el.setAttribute('aria-hidden', 'true'); }, 1300);
+    setTimeout(() => {
+      Engine.preloadDurations();
+      const t = Engine.cur;
+      if (Engine.has(t.i)) { Engine.select(t.i, false); Engine.decodePeaks(t); }
+      Engine.tracks.forEach(tr => { if (tr !== t) Engine.readTag(tr); });
+    }, 700);
+  },
+};
+
+/* ==========================================================================
+   Hero — kinetic wordmark
+   ========================================================================== */
+const Hero = {
+  init() {
+    this.ks = $$('#hero-title .k');
+    this.copy = $('#hero-copy');
+    $('#hero-play').addEventListener('click', () => Engine.toggle());
+    Ticker.add((dt, t) => this.frame(dt, t));
+  },
+  frame(dt, t) {
+    if (Scroll.active !== 'hero' && scrollY > innerHeight) return;
+    const hp = clamp(scrollY / innerHeight);
+    this.copy.style.transform = `translate3d(0,${(-hp * 120).toFixed(1)}px,0)`;
+    this.copy.style.opacity = (1 - hp * 1.6).toFixed(3);
+    if (Device.touch) { // touch screens: letters breathe on the compositor — no text re-layout per frame
+      if (reduced()) return;
+      this.ks.forEach((k, i) => {
+        const sx = 1 + .028 * Math.sin(t * .9 + i * 1.3) + Engine.level * .05 + Engine.beat * .015;
+        k.style.transform = `scaleX(${sx.toFixed(4)})`;
+      });
+      return;
+    }
+    const fine = mqFine.matches && Pointer.active && !reduced();
+    const rects = this.ks.map(k => k.getBoundingClientRect());
+    this.ks.forEach((k, i) => {
+      const r = rects[i];
+      let n;
+      if (fine) { const dx = Pointer.sx - (r.left + r.width / 2); n = Math.exp(-(dx * dx) / (2 * 260 * 260)); }
+      else n = reduced() ? .4 : .5 + .5 * Math.sin(t * .9 + i * 1.3);
+      const wd = mqMobile.matches ? 72 + n * 22 + Engine.level * 6 : 72 + n * 53 + Engine.level * 20;
+      const wg = 760 + n * 140 + Engine.beat * 60;
+      k.style.setProperty('--wd', clamp(wd, 62, 125).toFixed(1));
+      k.style.setProperty('--wg', clamp(wg, 100, 900).toFixed(0));
+    });
+  },
+};
+
+/* ==========================================================================
+   About — masked statement + artwork
+   ========================================================================== */
+/* A tile's live poster: a small ensō of dust in its state's colours. Hover and the
+   dust is blown away from the pointer, revealing the real cover underneath. */
+class DustPoster {
+  constructor(tile, i) {
+    this.i = i; this.tile = tile; this.box = $('.art__img', tile);
+    this.cv = document.createElement('canvas');
+    this.cv.className = 'art__dust';
+    this.cv.setAttribute('aria-hidden', 'true');
+    this.box.appendChild(this.cv);
+    this.ctx = this.cv.getContext('2d');
+    this.fine = mqFine.matches;
+    this.r = this.fine ? 0 : 1; this.hover = false; this.hasImg = false;
+    this.mx = .5; this.my = .5; this.w = 1; this.h = 1; this.visible = false;
+    this.rot = [-.25, .9, 2.3][i];
+    this.col = [[224, 33, 122], [236, 230, 219], [241, 236, 227]][i];
+    this.bg = [[221, 212, 197], [14, 13, 12], [37, 49, 207]][i];
+    const g = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+    this.dust = Array.from({ length: this.fine ? 2400 : Device.phone ? 700 : 1200 }, () => ({ u: Math.pow(Math.random(), 1.2), a: g(), z: Math.random(), ph: Math.random() * TAU, sx: Math.random() * 2 - 1, sy: Math.random() * 2 - 1 }));
+    const fit = () => {
+      const r = this.cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+      this.w = Math.max(1, r.width); this.h = Math.max(1, r.height);
+      this.cv.width = Math.round(this.w * dpr); this.cv.height = Math.round(this.h * dpr); this.dpr = dpr;
+    };
+    new ResizeObserver(fit).observe(this.cv);
+    new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; }).observe(this.cv);
+    fit();
+    tile.addEventListener('pointerenter', () => { this.hover = true; });
+    tile.addEventListener('pointerleave', () => { this.hover = false; });
+    tile.addEventListener('pointermove', e => {
+      const r = this.box.getBoundingClientRect();
+      this.mx = (e.clientX - r.left) / r.width; this.my = (e.clientY - r.top) / r.height;
+    });
+  }
+  frame(dt, t) {
+    if (!this.visible) return;
+    const want = this.fine ? (this.hover && this.hasImg ? 1 : 0) : (this.hasImg ? 1 : 0);
+    this.r = damp(this.r, want, this.hover ? 3.2 : 2.4, dt);
+    const { ctx: c, w, h, dpr, r } = this;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, w, h);
+    // the coloured ground fades away to show the cover
+    const ground = this.fine ? 1 - r : 0;
+    if (ground > .002) { c.fillStyle = rgba(this.bg, ground); c.fillRect(0, 0, w, h); }
+    const live = Engine.index === this.i && Engine.playing;
+    const lvl = live ? Engine.level : 0, beat = live ? Engine.beat : 0;
+    const R = Math.min(w, h) * .3 * (1 + lvl * .12), cx = w / 2, cy = h / 2;
+    const mx = this.mx * w, my = this.my * h, blow = this.fine ? r : 0;
+    const alpha = this.fine ? 1 - r * .85 : .55;
+    const col = this.fine ? this.col : [255, 255, 255];
+    for (const d of this.dust) {
+      const th = this.rot + d.u * .88 * TAU + Math.sin(t * .2 + this.i) * .1;
+      const wd = (1.15 - .8 * Math.pow(d.u, 1.2)) * R * .2 * (1 + beat * .8 * d.z);
+      const rr = R + d.a * wd + Math.sin(t * .8 + d.ph) * 1.5;
+      let x = cx + Math.sin(th) * rr, y = cy - Math.cos(th) * rr;
+      if (!this.fine) { x += Math.sin(t * .3 + d.ph) * 6; y += Math.cos(t * .25 + d.ph) * 6; }
+      if (blow > .001) { // blown outward from the pointer
+        const dx = x - mx, dy = y - my, dl = Math.hypot(dx, dy) || 1, k = blow * (40 + d.z * 160) * (1 + 120 / (dl + 40));
+        x += dx / dl * k + d.sx * blow * 30; y += dy / dl * k + d.sy * blow * 30;
+      } else if (this.fine && this.hover) {
+        const dx = x - mx, dy = y - my, dl = Math.hypot(dx, dy);
+        if (dl < 60) { x += dx / (dl || 1) * (60 - dl) * .6; y += dy / (dl || 1) * (60 - dl) * .6; }
+      }
+      const s = 1 + d.z * 1.6;
+      c.fillStyle = rgba(col, ((.35 + .65 * d.z) * alpha).toFixed(3));
+      c.fillRect(x, y, s, s);
+    }
+  }
+}
+
+const About = {
+  init() {
+    const p = $('#about-state');
+    const raw = p.textContent.trim();
+    p.setAttribute('aria-label', raw.replace(/[[\]]/g, ''));
+    p.textContent = '';
+    let i = 0;
+    (raw.match(/\[[^\]]+\]|[^\s[]+/g) || []).forEach(tok => {
+      const serif = tok[0] === '[';
+      (serif ? tok.slice(1, -1).trim().split(/\s+/) : [tok]).forEach(w => {
+        if (p.childNodes.length) p.appendChild(document.createTextNode(' '));
+        const m = document.createElement('span');
+        m.className = 'mask' + (serif ? ' serif' : '');
+        m.setAttribute('aria-hidden', 'true');
+        const sp = document.createElement('span');
+        sp.textContent = w; sp.style.setProperty('--i', i++);
+        m.appendChild(sp); p.appendChild(m);
+      });
+    });
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { threshold: .2 });
+    io.observe(p);
+    $$('[data-reveal]').forEach(el => io.observe(el));
+
+    this.art = $('#art');
+    this.build();
+    io.observe(this.art);
+    on('source', () => this.captions());
+    Ticker.add((dt, t) => { this.frame(); this.posters.forEach(p => p.frame(dt, t)); });
+  },
+  build() {
+    this.posters = [];
+    this.tiles = Engine.tracks.map((t, i) => {
+      const a = document.createElement('a');
+      a.className = 'art__tile';
+      a.href = '#tracks';
+      a.dataset.cursor = 'label';
+      a.dataset.cursorLabel = 'play';
+      a.innerHTML = `<div class="art__img"><img alt="" decoding="async"></div>
+        <div class="art__cap"><span><span class="serif">${ROMAN[i]}.</span> <b class="art__t"></b></span><span class="lab">${STATES[i].name}</span></div>`;
+      const poster = new DustPoster(a, i);
+      const img = $('img', a);
+      img.addEventListener('load', () => { poster.hasImg = true; });
+      img.addEventListener('error', () => { poster.hasImg = false; });
+      const url = Engine.coverOf(t);
+      if (url) img.src = url;
+      this.posters.push(poster);
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const r = a.getBoundingClientRect();
+        States.go(i, { x: r.left + r.width / 2, y: r.top + r.height / 2 }, true);
+        $('#tracks').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' });
+      });
+      this.art.appendChild(a);
+      return a;
+    });
+    this.captions();
+  },
+  captions() {
+    this.tiles.forEach((a, i) => {
+      const t = Engine.tracks[i];
+      $('.art__t', a).textContent = Engine.titleOf(t);
+      a.setAttribute('aria-label', `Play ${Engine.titleOf(t)} — state ${ROMAN[i]}, ${STATES[i].name}`);
+      if (t.coverBlob) {
+        const img = $('img', a);
+        if (img.src !== t.coverBlob) img.src = t.coverBlob;
+      }
+    });
+  },
+  frame() {
+    if (mqMobile.matches || reduced()) return;
+    const vh = innerHeight, sp = [.1, -.08, .16];
+    this.tiles.forEach((a, i) => {
+      const r = a.getBoundingClientRect();
+      if (r.bottom < -200 || r.top > vh + 200) return;
+      const c = (r.top + r.height / 2 - vh / 2) - (parseFloat(a.dataset.py) || 0);
+      const y = -c * sp[i];
+      a.dataset.py = y;
+      a.style.transform = `translate3d(0,${y.toFixed(1)}px,0)`;
+    });
+  },
+};
+
+/* ==========================================================================
+   States — the player
+   ========================================================================== */
+const States = {
+  scrubRatio: null,
+  init() {
+    this.sec = $('#tracks');
+    this.title = $('#stitle');
+    this.line = $('#state-line');
+    this.count = $('#state-count');
+    this.toggleBtn = $('#p-toggle');
+    this.now = $('#p-now'); this.dur = $('#p-dur'); this.note = $('#p-note');
+    this.hit = $('#orb-hit');
+    this.buildSwitch();
+    this.renderTitle(true);
+    this.toggleBtn.addEventListener('click', () => Engine.toggle());
+    $$('.pside [data-dir]').forEach(b => b.addEventListener('click', e => this.go(Engine.index + Number(b.dataset.dir), { x: e.clientX, y: e.clientY })));
+    this.initWave();
+    this.initVol();
+    this.initHit();
+    on('track', () => this.onTrack());
+    on('state', () => this.renderState());
+    on('source', t => { this.renderSwitch(); if (t.i === Engine.index) this.renderTitle(true); });
+    on('meta', () => this.renderSwitch());
+    on('offline', t => Toast.show(`${Engine.titleOf(t)} isn't available here — open it on Suno`));
+    on('volume', () => this.renderVol());
+    this.renderState();
+    this.renderVol();
+    $('#p-suno').href = Engine.cur.share;
+    Ticker.add((dt, t) => this.frame(dt, t));
+  },
+  /* switching a song = switching the state of the whole page */
+  go(i, origin, autoplay) {
+    i = ((i % 3) + 3) % 3;
+    this._origin = origin || { x: innerWidth / 2, y: innerHeight / 2 };
+    if (i === Engine.index) { if (autoplay && !Engine.playing) Engine.play(); return; }
+    Engine.select(i, autoplay === undefined ? Engine.playing : autoplay);
+  },
+  onTrack() {
+    const t = Engine.cur;
+    Theme.setState(t.i, this._origin || { x: innerWidth / 2, y: innerHeight / 2 });
+    this._origin = null;
+    this.renderSwitch();
+    this.renderTitle(false);
+    this.renderState();
+    $('#p-suno').href = t.share;
+    $('#sr-now').textContent = `${Engine.titleOf(t)} — state ${ROMAN[t.i]}, ${STATES[t.i].name}`;
+    if (Engine.ctx && Engine.has(t.i)) Engine.decodePeaks(t);
+  },
+  buildSwitch() {
+    const nav = $('#switch');
+    this.items = Engine.tracks.map((t, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'switch__item';
+      b.dataset.cursor = 'link';
+      b.innerHTML = `<span class="switch__n">${ROMAN[i]}</span><span class="switch__t"></span>`;
+      b.addEventListener('click', e => this.go(i, { x: e.clientX, y: e.clientY }, true));
+      b.addEventListener('pointerenter', () => { if (i !== Engine.index) Preview.start(i, b); });
+      b.addEventListener('pointerleave', () => Preview.stop());
+      nav.appendChild(b);
+      return b;
+    });
+    this.renderSwitch();
+  },
+  renderSwitch() {
+    this.items.forEach((b, i) => {
+      const t = Engine.tracks[i], name = Engine.titleOf(t);
+      $('.switch__t', b).textContent = name;
+      b.classList.toggle('is-active', i === Engine.index);
+      b.setAttribute('aria-pressed', String(i === Engine.index));
+      b.setAttribute('aria-label', `${name} — state ${ROMAN[i]}, ${STATES[i].name}${isFinite(t.duration) ? ', ' + fmt(t.duration) : ''}`);
+    });
+  },
+  renderTitle(instant) {
+    const t = Engine.cur, i = t.i, name = Engine.titleOf(t);
+    const build = () => {
+      this.sec.dataset.state = i;
+      this.title.textContent = '';
+      this.title.style.fontSize = '';
+      const base = document.createElement('span'), fill = document.createElement('span');
+      base.className = 'stitle__l stitle__base'; fill.className = 'stitle__l stitle__fill';
+      letters(base, name, 'c'); letters(fill, name, 'c');
+      this.title.append(base, fill);
+      this.fill = fill;
+      this.line.textContent = STATES[i].line;
+      this.count.textContent = `${ROMAN[i]} / III`;
+      this.fit();
+      this.title.classList.remove('is-out');
+      requestAnimationFrame(() => requestAnimationFrame(() => this.title.classList.add('is-in')));
+    };
+    if (instant || reduced() || !this.title.firstChild) { build(); return; }
+    this.title.classList.remove('is-in');
+    this.title.classList.add('is-out');
+    clearTimeout(this._tt);
+    this._tt = setTimeout(build, 520);
+  },
+  fit() {
+    this.title.style.fontSize = '';
+    const st = Number(this.sec.dataset.state);
+    const max = innerWidth * (Device.phone ? .92 : st === 1 ? 1.18 : .94);
+    const w = this.title.scrollWidth;
+    if (w > max) this.title.style.fontSize = (parseFloat(getComputedStyle(this.title).fontSize) * max / w).toFixed(1) + 'px';
+  },
+  renderState() {
+    const p = Engine.playing;
+    [this.toggleBtn, $('#hero-play'), $('#dock-toggle')].forEach(b => { b.classList.toggle('is-playing', p); b.setAttribute('aria-label', p ? 'Pause' : 'Play'); });
+    $('#hero-play-l').textContent = p ? 'Pause' : (Engine.begun ? 'Resume' : 'Play');
+    $('#hero-play-t').textContent = Engine.titleOf(Engine.cur);
+  },
+  /* waveform — a soft silhouette, not an equaliser */
+  initWave() {
+    const bar = $('#wave');
+    this.waveEl = bar;
+    this.wh = canvasHost($('#wave-cv'));
+    this.tip = $('#wave-tip');
+    this.hoverU = -1; this.hoverS = 0;
+    const at = e => { const r = bar.getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width); };
+    let drag = false;
+    bar.addEventListener('pointermove', e => {
+      const u = at(e);
+      this.hoverU = u;
+      bar.classList.add('is-hover');
+      this.tip.style.left = (u * 100) + '%';
+      this.tip.textContent = fmt(u * Engine.duration);
+      if (drag) { this.scrubRatio = u; Engine.seekRatio(u); }
+    });
+    bar.addEventListener('pointerleave', () => { this.hoverU = -1; bar.classList.remove('is-hover'); });
+    bar.addEventListener('pointerdown', e => {
+      if (!Engine.has(Engine.index)) return;
+      drag = true; bar.setPointerCapture(e.pointerId);
+      this.scrubRatio = at(e); Engine.seekRatio(this.scrubRatio);
+    });
+    const end = () => { if (drag) { drag = false; this.scrubRatio = null; } };
+    bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
+    bar.addEventListener('keydown', e => this.keys(e));
+  },
+  keys(e) {
+    const step = { ArrowRight: 5, ArrowUp: 5, ArrowLeft: -5, ArrowDown: -5, PageUp: 30, PageDown: -30 }[e.key];
+    if (step) { e.preventDefault(); e.stopPropagation(); Engine.seekBy(step); }
+    else if (e.key === 'Home') { e.preventDefault(); Engine.seekRatio(0); }
+    else if (e.key === 'End') { e.preventDefault(); Engine.seekRatio(.995); }
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); Engine.toggle(); }
+  },
+  drawWave(dt, t) {
+    const H = this.wh;
+    if (!H.visible) return;
+    const { ctx, cw, ch, dpr } = H;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cw, ch);
+    const tr = Engine.cur, P = tr.peaks, ratio = this.scrubRatio != null ? this.scrubRatio : Engine.ratio;
+    this.hoverS = damp(this.hoverS, this.hoverU >= 0 ? 1 : 0, 8, dt);
+    if (!this._cs || (this._csn = (this._csn || 0) + 1) % 8 === 0) {
+      const cs = getComputedStyle(document.documentElement);
+      this._cs = [cs.getPropertyValue('--fg').trim() || '#161412', cs.getPropertyValue('--accent').trim() || '#E0217A'];
+    }
+    const [fg, acc] = this._cs;
+    const n = 160, mid = ch / 2, pts = [];
+    for (let i = 0; i <= n; i++) {
+      const u = i / n;
+      let v = P ? P[Math.min(PEAKS_N - 1, Math.floor(u * PEAKS_N))] : 0;
+      if (!P || (tr.peaksKind === 'live' && v === 0)) v = .04 + .02 * Math.sin(u * 60 + t * 2);
+      if (this.hoverU >= 0) { const dx = (u - this.hoverU) * cw; v *= 1 + .6 * this.hoverS * Math.exp(-(dx * dx) / (2 * 40 * 40)); }
+      if (Engine.playing) { const dx = (u - ratio) * cw; v += Engine.level * .4 * Math.exp(-(dx * dx) / (2 * 26 * 26)); }
+      pts.push([u * cw, Math.min(1, v) * ch * .48]);
+    }
+    const shape = () => {
+      ctx.beginPath();
+      ctx.moveTo(0, mid);
+      for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1]; ctx.quadraticCurveTo(a[0], mid - a[1], (a[0] + b[0]) / 2, mid - (a[1] + b[1]) / 2); }
+      ctx.lineTo(cw, mid);
+      for (let i = pts.length - 1; i > 0; i--) { const a = pts[i], b = pts[i - 1]; ctx.quadraticCurveTo(a[0], mid + a[1], (a[0] + b[0]) / 2, mid + (a[1] + b[1]) / 2); }
+      ctx.closePath();
+    };
+    shape();
+    ctx.globalAlpha = .2; ctx.fillStyle = fg; ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, ratio * cw, ch); ctx.clip();
+    shape(); ctx.fillStyle = acc; ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = fg;
+    ctx.fillRect(Math.round(ratio * cw) - 1, 4, 2, ch - 8);
+  },
+  /* volume as a scrubbable number */
+  initVol() {
+    const v = $('#vol');
+    let sx = 0, sv = 0, moved = false, down = false;
+    v.addEventListener('pointerdown', e => { down = true; moved = false; sx = e.clientX; sv = Engine.volume; v.setPointerCapture(e.pointerId); });
+    v.addEventListener('pointermove', e => {
+      if (!down) return;
+      const dx = e.clientX - sx;
+      if (Math.abs(dx) > 3) moved = true;
+      if (moved) Engine.setVolume(sv + dx / 180);
+    });
+    v.addEventListener('pointerup', () => { if (down && !moved) Engine.toggleMute(); down = false; });
+    v.addEventListener('pointercancel', () => { down = false; });
+    v.addEventListener('keydown', e => {
+      const s = { ArrowUp: .05, ArrowRight: .05, ArrowDown: -.05, ArrowLeft: -.05 }[e.key];
+      if (s) { e.preventDefault(); e.stopPropagation(); Engine.setVolume(Engine.volume + s); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); Engine.toggleMute(); }
+    });
+  },
+  renderVol() {
+    const v = $('#vol'), pct = Math.round(Engine.volume * 100);
+    $('#vol-n').textContent = pct;
+    v.classList.toggle('is-muted', Engine.muted);
+    v.setAttribute('aria-valuenow', pct);
+    v.setAttribute('aria-valuetext', Engine.muted ? 'Muted' : pct + '%');
+  },
+  swiped() {
+    if (this.hintGone) return;
+    this.hintGone = true;
+    const h = $('#swipe-hint'); if (h) h.classList.add('is-gone');
+    store.set('swiped', true);
+  },
+  /* the object itself is the play button and the timeline */
+  initHit() {
+    if (store.get('swiped', false)) { this.hintGone = true; const h = $('#swipe-hint'); if (h) h.classList.add('is-gone'); }
+    const h = this.hit;
+    let st = null;
+    const angle = e => {
+      const s = Orb.screen;
+      return ((Math.atan2(e.clientX - s.x, -(e.clientY - s.y)) / TAU) + 1) % 1;
+    };
+    h.addEventListener('pointerdown', e => {
+      st = { x: e.clientX, y: e.clientY, moved: false, last: clamp(angle(e) / Math.max(.5, Orb.arc)), touch: e.pointerType !== 'mouse' };
+      if (!st.touch) { e.preventDefault(); h.setPointerCapture(e.pointerId); }
+    });
+    h.addEventListener('pointermove', e => {
+      if (!st || st.touch || !Engine.has(Engine.index)) return;
+      if (!st.moved && Math.hypot(e.clientX - st.x, e.clientY - st.y) < 6) return;
+      st.moved = true;
+      let r = clamp(angle(e) / Math.max(.5, Orb.arc));
+      if (Math.abs(r - st.last) > .5) r = st.last > .5 ? .999 : 0;
+      st.last = r;
+      this.scrubRatio = r;
+      Engine.seekRatio(r);
+    });
+    const end = e => {
+      if (!st) return;
+      if (st.touch && e.type === 'pointerup') {
+        // touch: a tap plays / pauses, a sideways swipe changes the song
+        const dx = e.clientX - st.x, dy = e.clientY - st.y;
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+          this.go(Engine.index + (dx < 0 ? 1 : -1), { x: e.clientX, y: e.clientY }, Engine.playing || Engine.begun);
+          buzz(12); this.swiped();
+        } else if (Math.hypot(dx, dy) < 12) { Engine.toggle(); buzz(8); }
+      } else if (!st.moved && e.type === 'pointerup') Engine.toggle();
+      st = null;
+      this.scrubRatio = null;
+    };
+    h.addEventListener('pointerup', end);
+    h.addEventListener('pointercancel', () => { st = null; this.scrubRatio = null; });
+    h.addEventListener('keydown', e => this.keys(e));
+  },
+  frame(dt, t) {
+    const ratio = this.scrubRatio != null ? this.scrubRatio : Engine.ratio;
+    if (this.fill) this.fill.style.clipPath = `inset(0 ${((1 - ratio) * 100).toFixed(2)}% 0 0)`;
+    const now = fmt(Engine.begun ? Engine.time : 0).replace('—', '0:00');
+    if (this.now.textContent !== now) {
+      this.now.textContent = now;
+      const vt = `${now} of ${fmt(Engine.duration)}`;
+      [this.waveEl, this.hit].forEach(el => { el.setAttribute('aria-valuenow', Math.round(ratio * 100)); el.setAttribute('aria-valuetext', vt); });
+    }
+    const dur = fmt(Engine.duration);
+    if (this.dur.textContent !== dur) this.dur.textContent = dur;
+    const note = Engine.playing && Engine.synthetic ? 'visual approximated' : '';
+    if (this.note.textContent !== note) this.note.textContent = note;
+    this.drawWave(dt, t);
+
+    // keep the hit area glued to the object while the player is on screen
+    const s = Orb.screen;
+    const on = Scroll.active === 'tracks' && Math.abs(Orb.pose[0] - Orb.target[0]) < .05 && !Menu.open;
+    if (on !== this.hitOn) { this.hitOn = on; this.hit.classList.toggle('is-on', on); }
+    if (on) {
+      const d = s.r * 2;
+      this.hit.style.width = this.hit.style.height = d + 'px';
+      this.hit.style.transform = `translate3d(${(s.x - s.r).toFixed(1)}px,${(s.y - s.r).toFixed(1)}px,0)`;
+      const lbl = this.scrubRatio != null ? 'seek' : Engine.playing ? 'pause' : 'play';
+      if (this.hit.dataset.cursorLabel !== lbl) this.hit.dataset.cursorLabel = lbl;
+    }
+  },
+};
+
+/* ==========================================================================
+   Listen on Suno — letters widen toward the pointer
+   ========================================================================== */
+const Listen = {
+  init() {
+    $$('[data-suno]').forEach(a => { a.href = CONFIG.sunoProfile; });
+    this.ks = [];
+    $$('[data-kin]').forEach(el => { const t = el.textContent; this.ks.push(...letters(el, t, 'k', false)); el.setAttribute('aria-hidden', 'true'); });
+    this.big = $('#big');
+    this.visible = false;
+    new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; }).observe(this.big);
+    this.list();
+    on('source', () => this.list());
+    Ticker.add((dt, t) => this.frame(dt, t));
+  },
+  list() {
+    const nav = $('#listen-list');
+    nav.innerHTML = '';
+    Engine.tracks.forEach((t, i) => {
+      const a = document.createElement('a');
+      a.className = 'lrow'; a.href = t.share; a.target = '_blank'; a.rel = 'noopener'; a.dataset.cursor = 'link';
+      a.innerHTML = `<span class="serif">${ROMAN[i]}.</span><span><b></b> <span class="lab">— ${STATES[i].name}</span></span><svg aria-hidden="true"><use href="#i-arrow"/></svg>`;
+      $('b', a).textContent = Engine.titleOf(t);
+      a.setAttribute('aria-label', `${Engine.titleOf(t)} on Suno (opens in a new tab)`);
+      nav.appendChild(a);
+    });
+  },
+  frame(dt, t) {
+    if (!this.visible || Device.touch) return; // static on touch screens: no per-frame re-layout
+    const fine = mqFine.matches && Pointer.active && !reduced();
+    const rects = this.ks.map(k => k.getBoundingClientRect());
+    this.ks.forEach((k, i) => {
+      const r = rects[i];
+      let n;
+      if (fine) {
+        const dx = Pointer.sx - (r.left + r.width / 2), dy = Pointer.sy - (r.top + r.height / 2);
+        n = Math.exp(-(dx * dx) / (2 * 180 * 180) - (dy * dy) / (2 * 220 * 220));
+      } else n = reduced() ? .3 : .5 + .5 * Math.sin(t * 1.1 - i * .6);
+      k.style.setProperty('--wd', clamp(66 + n * 56 + Engine.level * 16, 62, 125).toFixed(1));
+    });
+  },
+};
+
+/* ==========================================================================
+   Header "now playing", dock, menu
+   ========================================================================== */
+const Chrome = {
+  init() {
+    this.now = $('#now'); this.dock = $('#dock');
+    $('#dock-toggle').addEventListener('click', () => Engine.toggle());
+    $('#dock-meta').addEventListener('click', () => $('#tracks').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' }));
+    $('#year').textContent = new Date().getFullYear();
+    Ticker.add(() => this.frame());
+  },
+  frame() {
+    const t = Engine.cur;
+    const nowOn = Engine.started && !Menu.open;
+    if (nowOn !== this.nowOn) { this.nowOn = nowOn; this.now.classList.toggle('is-on', nowOn); this.now.setAttribute('aria-hidden', String(!nowOn)); this.now.tabIndex = nowOn ? 0 : -1; }
+    const nt = Engine.titleOf(t), ns = STATES[t.i].name;
+    if ($('#now-t').textContent !== nt) { $('#now-t').textContent = nt; $('#dock-t').textContent = `${ROMAN[t.i]}. ${nt}`; }
+    if ($('#now-s').textContent !== ns) $('#now-s').textContent = ns;
+    const dockOn = Engine.started && !Menu.open && Scroll.active !== 'tracks' && Scroll.active !== 'hero';
+    if (dockOn !== this.dockOn) {
+      this.dockOn = dockOn;
+      this.dock.classList.toggle('is-on', dockOn);
+      this.dock.setAttribute('aria-hidden', String(!dockOn));
+      $$('button', this.dock).forEach(b => { b.tabIndex = dockOn ? 0 : -1; });
+      document.body.classList.toggle('has-dock', dockOn);
+    }
+    if (dockOn) {
+      $('#dock-bar').style.transform = `scaleX(${Engine.ratio.toFixed(4)})`;
+      const tt = `${fmt(Engine.time).replace('—', '0:00')} / ${fmt(Engine.duration)}`;
+      if ($('#dock-time').textContent !== tt) $('#dock-time').textContent = tt;
+    }
+  },
+};
+
+const Menu = {
+  open: false,
+  init() {
+    this.el = $('#menu'); this.btn = $('#menu-btn');
+    this.btn.addEventListener('click', () => (this.open ? this.close(true) : this.show()));
+    $$('.menu__item', this.el).forEach(a => a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = $(a.getAttribute('href'));
+      this.close(false);
+      setTimeout(() => target && target.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' }), 80);
+    }));
+    this.el.addEventListener('keydown', e => {
+      if (e.key !== 'Tab') return;
+      const f = [this.btn, ...$$('a', this.el)];
+      const i = f.indexOf(document.activeElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+    });
+    this.btn.addEventListener('keydown', e => { if (this.open && e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); $('a', this.el).focus(); } });
+  },
+  show() {
+    const r = this.btn.getBoundingClientRect();
+    this.el.style.setProperty('--ox', (r.left + r.width / 2) + 'px');
+    this.el.style.setProperty('--oy', (r.top + r.height / 2) + 'px');
+    this.open = true;
+    this.el.classList.add('is-open');
+    this.btn.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('menu-open', 'is-locked');
+    setTimeout(() => { if (this.open) $('a', this.el).focus({ preventScroll: true }); }, 400);
+  },
+  close(refocus) {
+    if (!this.open) return;
+    this.open = false;
+    this.el.classList.remove('is-open');
+    this.btn.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('menu-open', 'is-locked');
+    if (refocus) this.btn.focus({ preventScroll: true });
+  },
+};
+
+/* ==========================================================================
+   Keyboard + file drop
+   ========================================================================== */
+function initKeys() {
+  addEventListener('keydown', e => {
+    if (Loader.active) { if (e.key === 'Enter' && Loader.el.classList.contains('is-ready') && e.target !== Loader.btn) Loader.enter(); return; }
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    if (e.key === 'Escape') { Menu.close(true); return; }
+    const interactive = e.target.closest && e.target.closest('button, a, [role="slider"]');
+    const mid = { x: innerWidth / 2, y: innerHeight / 2 };
+    switch (e.key) {
+      case ' ': if (interactive) return; e.preventDefault(); Engine.toggle(); break;
+      case 'k': case 'K': Engine.toggle(); break;
+      case 'ArrowRight': if (!interactive) { e.preventDefault(); Engine.seekBy(5); } break;
+      case 'ArrowLeft': if (!interactive) { e.preventDefault(); Engine.seekBy(-5); } break;
+      case 'n': case 'N': States.go(Engine.index + 1, mid); break;
+      case 'p': case 'P': States.go(Engine.index - 1, mid); break;
+      case 'm': case 'M': Engine.toggleMute(); Toast.show(Engine.muted ? 'Muted' : 'Sound on', 1400); break;
+      case '1': case '2': case '3': States.go(Number(e.key) - 1, mid, true); break;
+      default: break;
+    }
+  });
+}
+function initDrop() {
+  const drop = $('#drop');
+  let depth = 0;
+  const files = e => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
+  addEventListener('dragenter', e => { if (!files(e)) return; e.preventDefault(); depth++; drop.classList.add('is-on'); });
+  addEventListener('dragover', e => { if (files(e)) e.preventDefault(); });
+  addEventListener('dragleave', e => { if (!files(e)) return; depth = Math.max(0, depth - 1); if (!depth) drop.classList.remove('is-on'); });
+  addEventListener('drop', e => {
+    if (!files(e)) return;
+    e.preventDefault(); depth = 0; drop.classList.remove('is-on');
+    Engine.unlock();
+    Array.from(e.dataTransfer.files).slice(0, 3).forEach((f, k) => Engine.loadFile((Engine.index + k) % 3, f, k === 0));
+  });
+}
+
+/* ==========================================================================
+   Lyrics — the current line, sung inside the circle
+   ========================================================================== */
+const Lyrics = {
+  cur: null, track: -1,
+  init() {
+    this.el = document.createElement('div');
+    this.el.className = 'lyric';
+    this.el.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(this.el);
+    this.sec = $('#tracks');
+    Ticker.add(() => this.frame());
+  },
+  lineAt(L, time) {
+    let k = -1;
+    for (let i = 0; i < L.length; i++) { if (L[i][0] <= time + .12) k = i; else break; }
+    return k;
+  },
+  frame() {
+    const t = Engine.cur, L = t.lyrics;
+    const on = !!L && Scroll.active === 'tracks' && Engine.begun && !Menu.open;
+    let k = on ? this.lineAt(L, Engine.time) : -1;
+    if (k >= 0 && !L[k][1]) k = -1;
+    const key = k < 0 ? null : t.i + ':' + k;
+    if (key !== this.cur) { this.cur = key; this.show(k >= 0 ? L[k][1] : ''); }
+    const has = !!this.line;
+    this.el.classList.toggle('is-on', on && has);
+    this.sec.classList.toggle('has-lyric', on && has);
+    if (!on) return;
+    const s = Orb.screen, w = s.r * 1.12;
+    this.el.style.width = w + 'px';
+    this.el.style.height = (s.r * 1.2) + 'px';
+    this.el.style.transform = `translate3d(${(s.x - w / 2).toFixed(1)}px,${(s.y - s.r * .6).toFixed(1)}px,0)`;
+    if (this.line && k >= 0) {
+      const start = L[k][0], end = k + 1 < L.length ? L[k + 1][0] : start + 4;
+      const p = clamp((Engine.time - start) / Math.max(.5, (end - start) * .85));
+      const n = this.words.length;
+      this.words.forEach((wd, j) => wd.classList.toggle('is-sung', j < Math.ceil(p * n + .01)));
+    }
+  },
+  show(text) {
+    if (this.line) {
+      const old = this.line;
+      old.classList.add('is-out');
+      setTimeout(() => old.remove(), 750);
+      this.line = null; this.words = [];
+    }
+    if (!text) return;
+    const line = document.createElement('p');
+    line.className = 'lyric__line';
+    this.words = text.split(/\s+/).map((w, i) => {
+      const m = document.createElement('span'); m.className = 'lw';
+      const sp = document.createElement('span'); sp.textContent = w; sp.style.setProperty('--i', i);
+      m.appendChild(sp); line.appendChild(m); line.appendChild(document.createTextNode(' '));
+      return sp;
+    });
+    this.el.appendChild(line);
+    this.line = line;
+    requestAnimationFrame(() => requestAnimationFrame(() => line.classList.add('is-in')));
+  },
+};
+
+/* ==========================================================================
+   Deep links — enso/#spring opens straight on that song and its state
+   ========================================================================== */
+const slugOf = t => Engine.titleOf(t).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `track-${t.i + 1}`;
+const Link = {
+  pending: -1,
+  find(hash) {
+    let h = (hash || '').replace(/^#/, '');
+    try { h = decodeURIComponent(h).toLowerCase(); } catch { h = h.toLowerCase(); }
+    if (!h) return -1;
+    return Engine.tracks.findIndex(t => slugOf(t) === h || `track-${t.i + 1}` === h);
+  },
+  url(t) { return location.origin + location.pathname + '#' + slugOf(t); },
+  write() { if (Engine.started || Engine.index > 0) history.replaceState(null, '', '#' + slugOf(Engine.cur)); },
+  init() {
+    this.pending = this.find(location.hash);
+    if (this.pending > 0) Engine.select(this.pending, false); // its state is already set behind the loader
+    on('track', () => this.write());
+    on('state', st => { if (st === 'playing') this.write(); });
+    addEventListener('hashchange', () => {
+      const i = this.find(location.hash);
+      if (i < 0 || Loader.active) return;
+      States.go(i, null, true);
+      $('#tracks').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' });
+    });
+    $('#p-share').addEventListener('click', () => this.share());
+  },
+  async share() {
+    const t = Engine.cur, url = this.url(t), title = `${Engine.titleOf(t)} — Enso`;
+    if (navigator.share) {
+      try { await navigator.share({ title, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    try { await navigator.clipboard.writeText(url); Toast.show(`Link copied — it opens straight on ${Engine.titleOf(t)}`); }
+    catch { Toast.show(url, 6000); }
+  },
+};
+
+/* ==========================================================================
+   Boot
+   ========================================================================== */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+Theme.apply(Theme.colors());
+Cursor.init();
+View.init();
+Scroll.init();
+Orb.init();
+Magnetic.init();
+Hero.init();
+About.init();
+States.init();
+Listen.init();
+Chrome.init();
+Menu.init();
+Lyrics.init();
+Link.init();
+initKeys();
+initDrop();
+Loader.init();
+let rt = 0;
+addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => States.fit(), 200); });
+on('view', () => setTimeout(() => States.fit(), 60));
+if (document.fonts) document.fonts.ready.then(() => States.fit());
+})();
+</script>
 </body>
 </html>
