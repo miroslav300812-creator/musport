@@ -23,6 +23,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script>
+/* phone / tablet / desktop decided before first paint, so each gets its own layout */
+(function () {
+  var d = document.documentElement, w = innerWidth, h = innerHeight, s = Math.min(w, h);
+  var coarse = matchMedia('(pointer: coarse)').matches || !matchMedia('(hover: hover)').matches;
+  var k = (w <= 600 || (coarse && s < 600)) ? 'phone' : coarse ? 'tablet' : 'desk';
+  d.className += ' is-' + k + (h > w ? ' is-portrait' : ' is-landscape');
+})();
+</script>
 <noscript><style>body{overflow:auto!important}.loader{display:none!important}.cursor{display:none!important}[data-reveal],.mask>span{opacity:1!important;transform:none!important}</style></noscript>
 <style>
 /* ==========================================================================
@@ -86,7 +95,7 @@ ul, ol { list-style: none; margin: 0; padding: 0; }
 /* ==========================================================================
    Layers — the fixed 3D object lives between text "under" and UI "over"
    ========================================================================== */
-.gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.gl { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 1; pointer-events: none; }
 .under { position: relative; z-index: 0; }
 .over { position: relative; z-index: 2; }
 .wipe { position: fixed; inset: 0; z-index: -1; pointer-events: none; clip-path: circle(0% at var(--wx, 50%) var(--wy, 50%)); }
@@ -358,7 +367,7 @@ html.has-cursor .cursor { display: block; }
 .stitle { transition: opacity 1s var(--e-out); }
 .states.has-lyric .stitle { opacity: .28; }
 .states.has-lyric[data-state="2"] .stitle { opacity: .1; }
-@media (max-width: 760px) { .lyric__line { font-size: clamp(17px, 4.8vw, 24px); } }
+@media (max-width: 600px) { .lyric__line { font-size: clamp(17px, 4.8vw, 24px); } }
 
 /* ==========================================================================
    Listen on Suno — inverted
@@ -446,7 +455,7 @@ body.menu-open .now { opacity: 0; }
   .pside { grid-column: 1 / -1; justify-content: space-between; }
   .art__tile:nth-child(2) { left: 38%; width: 26%; }
 }
-@media (max-width: 760px) {
+@media (max-width: 600px) {
   body { font-size: 13.5px; }
   .now { display: none; }
   .top { grid-template-columns: 1fr auto; }
@@ -490,6 +499,73 @@ body.menu-open .now { opacity: 0; }
   .dock__t { max-width: none; }
   .menu__d { display: none; }
 }
+
+/* ==========================================================================
+   Touch screens — a calmer, lighter build of the same site
+   ========================================================================== */
+.swipe-hint { display: none; }
+.rotate { display: none; }
+.is-phone .grain, .is-tablet .grain { display: none; }
+.is-phone .toast, .is-tablet .toast { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.is-phone .hero__hint, .is-tablet .hero__hint { display: none; }
+.is-phone .hero__title .k, .is-tablet .hero__title .k { transform-origin: 50% 100%; will-change: transform; }
+.is-phone .hero__title .k { --wd: 84; }
+.is-tablet .hero__title .k { --wd: 94; }
+.is-phone .big__row .k, .is-tablet .big__row .k { --wd: 80; }
+.swipe-hint { align-items: center; gap: 8px; transition: opacity .8s var(--e-out), transform .8s var(--e-out); }
+.swipe-hint i { width: 18px; height: 1px; background: currentColor; position: relative; overflow: hidden; }
+.swipe-hint i::after { content: ''; position: absolute; inset: 0; background: var(--accent); animation: hint 2.4s var(--e-io) infinite; }
+.swipe-hint.is-gone { opacity: 0; transform: translateY(-4px); pointer-events: none; }
+.is-phone .swipe-hint, .is-tablet .swipe-hint { display: flex; }
+
+/* phones, 6.1–6.9" (≈ 375–440 css px wide) */
+.is-phone body { font-size: 14px; }
+.is-phone .hero__intro { top: calc(var(--g) + 56px); max-width: 17ch; font-size: 15px; }
+.is-phone .hero__play { top: calc(var(--g) + 58px); right: var(--g); left: auto; flex-direction: column; align-items: flex-end; gap: 10px; }
+.is-phone .hero__play .rb { --s: 62px; }
+.is-phone .hero__play-txt { order: 1; text-align: right; }
+.is-phone .hero__play-txt .serif { font-size: 19px; }
+.is-phone .states__ui { padding-top: calc(var(--g) + 50px); }
+.is-phone .states__head { gap: 14px; }
+.is-phone .states__desc { gap: 6px; }
+.is-phone .states__desc .serif { font-size: 20px; }
+.is-phone .switch__n { font-size: 38px; }
+.is-phone .states .stitle {
+  left: 0 !important; right: 0 !important; top: auto !important; bottom: calc(232px + var(--safe-b)) !important; margin: 0 !important;
+  text-align: center; line-height: .95;
+}
+.is-phone .states[data-state="0"] .stitle { font-size: 14vw; }
+.is-phone .states[data-state="1"] .stitle { font-size: 17vw; }
+.is-phone .states[data-state="2"] .stitle { font-size: 8.6vw; }
+.is-phone .pbar { column-gap: 16px; row-gap: 16px; }
+.is-phone .pbar .rb { --s: 64px; }
+.is-phone .pside { flex-wrap: nowrap; justify-content: space-between; column-gap: 10px; }
+.is-phone .pside .pnote { display: none; }
+.is-phone .step button { width: 44px; height: 44px; }
+.is-phone .switch__item, .is-phone .pside .ul, .is-phone .vol { min-height: 44px; }
+.is-phone .art__tile { width: 78% !important; }
+.is-phone .big__row { font-size: 21.5vw; }
+.is-phone .dock { padding-right: 16px; }
+
+/* upright tablets (iPad mini → iPad Pro 13", Android tablets) */
+.is-tablet.is-portrait .hero__play { top: calc(var(--g) + 170px); left: var(--g); right: auto; }
+.is-tablet.is-portrait .hero__play-txt { order: 1; text-align: left; }
+.is-tablet.is-portrait .hero__phrase { font-size: 4.4vw; }
+.is-tablet.is-portrait .states[data-state="0"] .stitle { font-size: 15vw; bottom: 19vh; }
+.is-tablet.is-portrait .states[data-state="2"] .stitle { font-size: 9.5vw; }
+.is-tablet.is-portrait .art { height: 152vw; margin-bottom: 4vw; }
+.is-tablet.is-portrait .art__tile:nth-child(1) { width: 40%; }
+.is-tablet.is-portrait .art__tile:nth-child(2) { left: 50%; top: 30%; width: 34%; }
+.is-tablet.is-portrait .art__tile:nth-child(3) { right: auto; left: 8%; top: 58%; width: 38%; }
+.is-tablet .step button { width: 48px; height: 48px; }
+
+/* phones held sideways: this site is made for upright screens */
+.is-phone.is-landscape .rotate {
+  display: grid; position: fixed; inset: 0; z-index: 400; place-items: center; align-content: center; gap: 18px;
+  background: var(--bg); color: var(--fg); text-align: center; padding: 24px;
+}
+.rotate svg { width: 54px; height: 54px; animation: spin 6s linear infinite; }
+.rotate p { font: 400 26px/1.1 var(--f-s); font-style: italic; }
 
 @media (prefers-reduced-motion: reduce) {
   .grain, .now__ring circle, .hero__hint i::after { animation: none !important; }
@@ -574,6 +650,7 @@ body.menu-open .now { opacity: 0; }
       <div class="states__desc">
         <h2 class="lab" id="states-h">Listen — <span id="state-count">I / III</span></h2>
         <p class="serif" id="state-line">Clay — warm, slow, close.</p>
+        <p class="swipe-hint lab" id="swipe-hint" aria-hidden="true"><i></i>Tap the circle to play · swipe it to change the song</p>
       </div>
       <nav class="switch" id="switch" aria-label="Choose a song"></nav>
     </div>
@@ -648,6 +725,11 @@ body.menu-open .now { opacity: 0; }
   </div>
 </div>
 
+<div class="rotate" aria-live="polite">
+  <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M44 12A22 22 0 1 1 28 10.6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 5"/></svg>
+  <p>Turn your phone upright</p>
+  <span class="lab">Enso is made for a vertical screen</span>
+</div>
 <div class="drop" id="drop" aria-hidden="true"><p>Release to play it here</p></div>
 <input type="file" id="file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac" hidden>
 
@@ -853,12 +935,54 @@ const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 25
 const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
 const mqFine = matchMedia('(hover: hover) and (pointer: fine)');
-const mqMobile = matchMedia('(max-width: 760px)');
+const mqMobile = matchMedia('(max-width: 600px)');
 const reduced = () => mqReduce.matches;
+
+/* Device class (phone / tablet / desk) and a viewport height that ignores the mobile
+   address bar sliding in and out — the object must not jump when it does. */
+const Device = {
+  kind: 'desk', portrait: false,
+  detect() {
+    const w = innerWidth, h = innerHeight, s = Math.min(w, h);
+    const coarse = matchMedia('(pointer: coarse)').matches || !matchMedia('(hover: hover)').matches;
+    const kind = (w <= 600 || (coarse && s < 600)) ? 'phone' : coarse ? 'tablet' : 'desk';
+    const root = document.documentElement;
+    root.classList.remove('is-phone', 'is-tablet', 'is-desk', 'is-portrait', 'is-landscape');
+    root.classList.add('is-' + kind, h > w ? 'is-portrait' : 'is-landscape');
+    this.kind = kind; this.portrait = h > w;
+  },
+  get phone() { return this.kind === 'phone'; },
+  get tablet() { return this.kind === 'tablet'; },
+  get touch() { return this.kind !== 'desk'; },
+};
+Device.detect();
+const View = {
+  w: innerWidth, h: innerHeight,
+  init() {
+    this.probe = document.createElement('div');
+    this.probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;visibility:hidden;pointer-events:none';
+    if (window.CSS && CSS.supports('height', '100lvh')) this.probe.style.height = '100lvh';
+    document.body.appendChild(this.probe);
+    this.measure(true);
+    addEventListener('resize', () => this.measure());
+    addEventListener('orientationchange', () => setTimeout(() => this.measure(true), 250));
+  },
+  measure(force) {
+    const w = innerWidth, h = this.probe.offsetHeight || innerHeight;
+    // on touch screens only a real change (rotation, split view) counts — not the address bar
+    if (force || !Device.touch || w !== this.w || Math.abs(h - this.h) > 160) {
+      const changed = w !== this.w || h !== this.h;
+      this.w = w; this.h = h;
+      Device.detect();
+      if (changed || force) emit('view');
+    }
+  },
+};
 const store = {
   get(k, d = null) { try { const v = localStorage.getItem('enso:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('enso:' + k, JSON.stringify(v)); } catch { /* unavailable */ } },
 };
+const buzz = ms => { try { if (Device.touch && navigator.vibrate) navigator.vibrate(ms); } catch { /* unsupported */ } };
 const bus = new EventTarget();
 const emit = (n, d) => bus.dispatchEvent(new CustomEvent(n, { detail: d }));
 const on = (n, f) => bus.addEventListener(n, e => f(e.detail));
@@ -1344,10 +1468,15 @@ const Theme = {
 /* ==========================================================================
    Scroll — active section, the object's choreography between sections
    ========================================================================== */
+/* [x, y, scale, visible] per section. On desktop the circle travels between sections;
+   on phones and upright tablets it only lives in the hero and the player, and fades
+   rather than flies when you scroll between them. */
 const POSES = {
-  desk: { hero: [.3, .02, .82], about: [-.74, -.04, .62], tracks: [0, .035, .62], listen: [.6, -.1, .55], foot: [.6, -.24, .45] },
-  mob: { hero: [.04, .16, .5], about: [.22, .3, .34], tracks: [0, .0, .4], listen: [.34, -.02, .3], foot: [.34, -.1, .26] },
+  desk: { hero: [.3, .02, .82, 1], about: [-.74, -.04, .62, 1], tracks: [0, .035, .62, 1], listen: [.6, -.1, .55, 1], foot: [.6, -.24, .45, 1] },
+  phone: { hero: [0, .135, .56, 1], about: [0, .135, .56, 0], tracks: [0, .045, .47, 1], listen: [0, .045, .47, 0], foot: [0, .045, .47, 0] },
+  tabletP: { hero: [0, .1, .6, 1], about: [0, .1, .6, 0], tracks: [0, .04, .52, 1], listen: [0, .04, .52, 0], foot: [0, .04, .52, 0] },
 };
+const poseSet = () => Device.phone ? POSES.phone : (Device.tablet && Device.portrait) ? POSES.tabletP : POSES.desk;
 const Scroll = {
   active: 'hero', sections: [],
   init() {
@@ -1356,14 +1485,14 @@ const Scroll = {
     Ticker.add(() => this.frame());
   },
   frame() {
-    const vh = innerHeight, y = scrollY, set = mqMobile.matches ? POSES.mob : POSES.desk;
+    const vh = View.h, y = scrollY, set = poseSet();
     const anchors = this.sections.map(s => {
       const r = s.getBoundingClientRect();
       return { name: s.dataset.section, a: Math.max(0, r.top + y - Math.max(0, (vh - r.height) / 2)), top: r.top, bottom: r.bottom, el: s };
     });
     // active section = the one under the middle of the viewport
     let act = anchors[0];
-    for (const a of anchors) if (a.top <= vh * .5) act = a;
+    for (const a of anchors) if (a.top <= innerHeight * .5) act = a;
     if (act.name !== this.active) {
       this.active = act.name;
       Theme.setInverted(act.el.hasAttribute('data-invert'));
@@ -1374,7 +1503,15 @@ const Scroll = {
     const A = anchors[i], B = anchors[Math.min(i + 1, anchors.length - 1)];
     const t = B === A ? 0 : smooth(clamp((y - A.a) / Math.max(1, B.a - A.a)));
     const pa = set[A.name], pb = set[B.name];
-    Orb.target = [lerp(pa[0], pb[0], t), lerp(pa[1], pb[1], t), lerp(pa[2], pb[2], t)];
+    if (pa[3] && pb[3]) {
+      Orb.target = [lerp(pa[0], pb[0], t), lerp(pa[1], pb[1], t), lerp(pa[2], pb[2], t)];
+      Orb.targetVis = 1;
+    } else {
+      // one side is hidden: stay where the visible one is, and fade instead of travelling
+      const showB = pb[3] > pa[3];
+      Orb.target = (showB ? pb : pa).slice(0, 3);
+      Orb.targetVis = showB ? smooth(clamp((t - .45) / .45)) : (pa[3] ? 1 - smooth(clamp(t / .45)) : 0);
+    }
   },
 };
 
@@ -1436,17 +1573,17 @@ void main() {
 
 const Orb = {
   target: POSES.desk.hero, pose: [.3, .02, .82], arc: 0, prog: 1, introOn: false, intro: 0,
-  w: [1, 0, 0], spinX: 0, spinY: 0, vx: 0, vy: 0, drag: null, mouse: 0, q: 1, slow: 0, dark: 0,
+  w: [1, 0, 0], spinX: 0, spinY: 0, vx: 0, vy: 0, drag: null, mouse: 0, q: 1, slow: 0, dark: 0, vis: 1, targetVis: 1,
   init() {
     this.cv = $('#gl');
-    this.count = mqFine.matches ? 16000 : 9000;
+    this.count = Device.phone ? 7000 : Device.tablet ? 11000 : 16000;
     this.data = this.makeDust(this.count);
     const gl = this.cv.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' });
     if (gl) this.gl = this.setupGL(gl);
     if (!this.gl) { this.ctx2d = this.cv.getContext('2d'); this.count = Math.min(this.count, 5000); }
     this.resize();
-    addEventListener('resize', () => this.resize());
-    this.initDrag();
+    on('view', () => this.resize());
+    if (!Device.touch) this.initDrag();
     Ticker.add((dt, t) => this.frame(dt, t));
   },
   /* u (biased toward the heavy start of the stroke), radial + depth spread, size, phase */
@@ -1488,14 +1625,16 @@ const Orb = {
     return gl;
   },
   resize() {
-    const dpr = Math.min(2, devicePixelRatio || 1) * this.q;
-    this.cv.width = Math.max(2, Math.round(innerWidth * dpr));
-    this.cv.height = Math.max(2, Math.round(innerHeight * dpr));
+    const dpr = Math.min(Device.phone ? 1.75 : 2, devicePixelRatio || 1) * this.q;
+    this.cv.width = Math.max(2, Math.round(View.w * dpr));
+    this.cv.height = Math.max(2, Math.round(View.h * dpr));
   },
   /* screen-space circle of the object (CSS px) — also the play/scrub hit area */
   get screen() {
-    const H = innerHeight;
-    return { x: innerWidth / 2 + this.pose[0] * H, y: H / 2 - this.pose[1] * H, r: .62 * this.pose[2] * H * this.introScale };
+    const H = View.h;
+    // on narrow screens the circle is sized by the width so it never spills off the sides
+    const r = .62 * this.pose[2] * Math.min(H, View.w * (Device.touch ? 1.45 : 9)) * this.introScale;
+    return { x: View.w / 2 + this.pose[0] * H, y: H / 2 - this.pose[1] * H, r };
   },
   get introScale() { return .6 + .4 * smooth(this.intro); },
   initDrag() {
@@ -1519,7 +1658,8 @@ const Orb = {
   },
   frame(dt, t) {
     if (this.introOn) this.intro = Math.min(1, this.intro + dt / (reduced() ? .3 : 2.4));
-    for (let k = 0; k < 3; k++) this.pose[k] = damp(this.pose[k], this.target[k], 4.5, dt);
+    for (let k = 0; k < 3; k++) this.pose[k] = damp(this.pose[k], this.target[k], Device.touch ? 6 : 4.5, dt);
+    this.vis = damp(this.vis, this.targetVis, 6, dt);
     const sw = STATES[Theme.state].w;
     for (let k = 0; k < 3; k++) this.w[k] = damp(this.w[k], sw[k], 3.2, dt);
     // how dark the page currently is — eased slower than the background for a filmic re-tone
@@ -1540,19 +1680,26 @@ const Orb = {
       this.spinX = damp(this.spinX, Math.round(this.spinX / TAU) * TAU, 1.4, dt);
     }
     const calm = Scroll.active === 'tracks' ? .3 : 1;
-    const px = (Pointer.sx / innerWidth - .5), py = (Pointer.sy / innerHeight - .5);
-    const rx = (.18 + py * .3) * calm + this.spinX + Math.sin(t * .4) * .05 * calm;
-    const ry = (-.22 + px * .45) * calm + this.spinY + Math.sin(t * .3) * .1 * calm;
+    let rx, ry;
+    if (Device.touch) { // no cursor on touch screens: a slow, steady breath instead of following the finger
+      rx = .12 + Math.sin(t * .35) * .035;
+      ry = Math.sin(t * .27) * .07;
+    } else {
+      const px = (Pointer.sx / innerWidth - .5), py = (Pointer.sy / innerHeight - .5);
+      rx = (.18 + py * .3) * calm + this.spinX + Math.sin(t * .4) * .05 * calm;
+      ry = (-.22 + px * .45) * calm + this.spinY + Math.sin(t * .3) * .1 * calm;
+    }
     this.mouse = damp(this.mouse, Pointer.active && mqFine.matches ? 1 : 0, 4, dt);
-    const alpha = smooth(clamp(this.intro * 3));
+    const alpha = smooth(clamp(this.intro * 3)) * this.vis;
     if (this.gl && !this.lost) this.drawGL(t, rx, ry, alpha);
     else if (this.ctx2d) this.draw2D(t, rx, ry, alpha);
     // adaptive quality — keep it smooth on slower devices
     this.slow = damp(this.slow, dt > 1 / 38 ? 1 : 0, 1, dt);
     if (this.slow > .8 && this.q > .5 && t > 4) { this.q *= .8; this.slow = 0; this.resize(); }
+    this.drawnVisible = alpha > .02;
   },
   drawGL(t, rx, ry, alpha) {
-    const gl = this.gl, u = this.u, W = this.cv.width, H = this.cv.height, k = W / innerWidth, s = this.screen;
+    const gl = this.gl, u = this.u, W = this.cv.width, H = this.cv.height, k = W / View.w, s = this.screen;
     gl.viewport(0, 0, W, H);
     gl.clear(gl.COLOR_BUFFER_BIT);
     if (alpha <= 0) return;
@@ -1574,7 +1721,7 @@ const Orb = {
   },
   /* fallback without WebGL: the same dust, fewer particles, flat */
   draw2D(t, rx, ry, alpha) {
-    const c = this.ctx2d, W = this.cv.width, H = this.cv.height, k = W / innerWidth, s = this.screen, D = this.data;
+    const c = this.ctx2d, W = this.cv.width, H = this.cv.height, k = W / View.w, s = this.screen, D = this.data;
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.clearRect(0, 0, W, H);
     if (alpha <= 0) return;
@@ -1695,6 +1842,17 @@ const Hero = {
   },
   frame(dt, t) {
     if (Scroll.active !== 'hero' && scrollY > innerHeight) return;
+    const hp = clamp(scrollY / innerHeight);
+    this.copy.style.transform = `translate3d(0,${(-hp * 120).toFixed(1)}px,0)`;
+    this.copy.style.opacity = (1 - hp * 1.6).toFixed(3);
+    if (Device.touch) { // touch screens: letters breathe on the compositor — no text re-layout per frame
+      if (reduced()) return;
+      this.ks.forEach((k, i) => {
+        const sx = 1 + .028 * Math.sin(t * .9 + i * 1.3) + Engine.level * .05 + Engine.beat * .015;
+        k.style.transform = `scaleX(${sx.toFixed(4)})`;
+      });
+      return;
+    }
     const fine = mqFine.matches && Pointer.active && !reduced();
     const rects = this.ks.map(k => k.getBoundingClientRect());
     this.ks.forEach((k, i) => {
@@ -1702,15 +1860,11 @@ const Hero = {
       let n;
       if (fine) { const dx = Pointer.sx - (r.left + r.width / 2); n = Math.exp(-(dx * dx) / (2 * 260 * 260)); }
       else n = reduced() ? .4 : .5 + .5 * Math.sin(t * .9 + i * 1.3);
-      // on phones the word sits in two fixed rows (EN / SO) — keep the breathing narrow enough to fit
       const wd = mqMobile.matches ? 72 + n * 22 + Engine.level * 6 : 72 + n * 53 + Engine.level * 20;
       const wg = 760 + n * 140 + Engine.beat * 60;
       k.style.setProperty('--wd', clamp(wd, 62, 125).toFixed(1));
       k.style.setProperty('--wg', clamp(wg, 100, 900).toFixed(0));
     });
-    const hp = clamp(scrollY / innerHeight);
-    this.copy.style.transform = `translate3d(0,${(-hp * 120).toFixed(1)}px,0)`;
-    this.copy.style.opacity = (1 - hp * 1.6).toFixed(3);
   },
 };
 
@@ -1734,7 +1888,7 @@ class DustPoster {
     this.col = [[224, 33, 122], [236, 230, 219], [241, 236, 227]][i];
     this.bg = [[221, 212, 197], [14, 13, 12], [37, 49, 207]][i];
     const g = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
-    this.dust = Array.from({ length: this.fine ? 2400 : 1200 }, () => ({ u: Math.pow(Math.random(), 1.2), a: g(), z: Math.random(), ph: Math.random() * TAU, sx: Math.random() * 2 - 1, sy: Math.random() * 2 - 1 }));
+    this.dust = Array.from({ length: this.fine ? 2400 : Device.phone ? 700 : 1200 }, () => ({ u: Math.pow(Math.random(), 1.2), a: g(), z: Math.random(), ph: Math.random() * TAU, sx: Math.random() * 2 - 1, sy: Math.random() * 2 - 1 }));
     const fit = () => {
       const r = this.cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
       this.w = Math.max(1, r.width); this.h = Math.max(1, r.height);
@@ -1968,7 +2122,7 @@ const States = {
   fit() {
     this.title.style.fontSize = '';
     const st = Number(this.sec.dataset.state);
-    const max = innerWidth * (st === 1 ? 1.18 : .94);
+    const max = innerWidth * (Device.phone ? .92 : st === 1 ? 1.18 : .94);
     const w = this.title.scrollWidth;
     if (w > max) this.title.style.fontSize = (parseFloat(getComputedStyle(this.title).fontSize) * max / w).toFixed(1) + 'px';
   },
@@ -2078,8 +2232,15 @@ const States = {
     v.setAttribute('aria-valuenow', pct);
     v.setAttribute('aria-valuetext', Engine.muted ? 'Muted' : pct + '%');
   },
+  swiped() {
+    if (this.hintGone) return;
+    this.hintGone = true;
+    const h = $('#swipe-hint'); if (h) h.classList.add('is-gone');
+    store.set('swiped', true);
+  },
   /* the object itself is the play button and the timeline */
   initHit() {
+    if (store.get('swiped', false)) { this.hintGone = true; const h = $('#swipe-hint'); if (h) h.classList.add('is-gone'); }
     const h = this.hit;
     let st = null;
     const angle = e => {
@@ -2102,7 +2263,14 @@ const States = {
     });
     const end = e => {
       if (!st) return;
-      if (!st.moved && e.type === 'pointerup') Engine.toggle();
+      if (st.touch && e.type === 'pointerup') {
+        // touch: a tap plays / pauses, a sideways swipe changes the song
+        const dx = e.clientX - st.x, dy = e.clientY - st.y;
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+          this.go(Engine.index + (dx < 0 ? 1 : -1), { x: e.clientX, y: e.clientY }, Engine.playing || Engine.begun);
+          buzz(12); this.swiped();
+        } else if (Math.hypot(dx, dy) < 12) { Engine.toggle(); buzz(8); }
+      } else if (!st.moved && e.type === 'pointerup') Engine.toggle();
       st = null;
       this.scrubRatio = null;
     };
@@ -2167,7 +2335,7 @@ const Listen = {
     });
   },
   frame(dt, t) {
-    if (!this.visible) return;
+    if (!this.visible || Device.touch) return; // static on touch screens: no per-frame re-layout
     const fine = mqFine.matches && Pointer.active && !reduced();
     const rects = this.ks.map(k => k.getBoundingClientRect());
     this.ks.forEach((k, i) => {
@@ -2401,6 +2569,7 @@ const Link = {
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 Theme.apply(Theme.colors());
 Cursor.init();
+View.init();
 Scroll.init();
 Orb.init();
 Magnetic.init();
@@ -2417,6 +2586,7 @@ initDrop();
 Loader.init();
 let rt = 0;
 addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => States.fit(), 200); });
+on('view', () => setTimeout(() => States.fit(), 60));
 if (document.fonts) document.fonts.ready.then(() => States.fit());
 })();
 </script>
