@@ -346,7 +346,7 @@ html.has-cursor .cursor { display: block; }
 .orb-hit:focus-visible { outline-offset: -2px; }
 
 /* lyrics — sung inside the circle */
-.lyric { position: fixed; z-index: 2; left: 0; top: 0; display: grid; place-items: center; text-align: center; pointer-events: none; opacity: 0; transition: opacity .8s var(--e-out); }
+.lyric { position: fixed; z-index: 0; left: 0; top: 0; display: grid; place-items: center; text-align: center; pointer-events: none; opacity: 0; transition: opacity .8s var(--e-out); }
 .lyric.is-on { opacity: 1; }
 .lyric__line { grid-area: 1 / 1; max-width: 100%; font: 400 clamp(20px, 2.35vw, 42px)/1.1 var(--f-s); font-style: italic; letter-spacing: -.01em; text-wrap: balance; }
 .lyric__line .lw { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 .04em .12em; margin-bottom: -.12em; }
