@@ -634,8 +634,8 @@ body.menu-open .now { opacity: 0; }
 /* ==========================================================================
    CONFIG
    --------------------------------------------------------------------------
-   src    : the audio file inside this repository (audio/track-1.mp3 …).
-            Played first — upload the MP3s from Suno into the audio/ folder.
+   src    : the audio file(s) inside this repository — the first one that
+            exists is played (audio/track-1.mp3, .mp4 or .m4a).
    songId : the Suno song UUID — fallback: streams from Suno's CDN if the
             local file is missing. Also used for the cover art.
    title  : set it to override the displayed name ('' = read from the MP3).
@@ -643,9 +643,9 @@ body.menu-open .now { opacity: 0; }
 const CONFIG = {
   sunoProfile: 'https://suno.com/@ensomusicrecords74?page=songs',
   tracks: [
-    { code: 'FlUHU56FcRSXQtcj', songId: '06ebbe47-8539-4eea-916f-7017b690b90d', title: '', src: 'audio/track-1.mp3' },
-    { code: 'Rkw3YUjjzWxiJ3Lj', songId: '303f09a5-e35c-4722-827e-9b280a07504e', title: '', src: 'audio/track-2.mp3' },
-    { code: 'Gcx2V4lbPDyMZvUh', songId: '80cf2f18-caf9-4f7a-a16a-2eab9a8f1e55', title: '', src: 'audio/track-3.mp3' },
+    { code: 'FlUHU56FcRSXQtcj', songId: '06ebbe47-8539-4eea-916f-7017b690b90d', title: '', src: ['audio/track-1.mp3', 'audio/track-1.mp4', 'audio/track-1.m4a'] },
+    { code: 'Rkw3YUjjzWxiJ3Lj', songId: '303f09a5-e35c-4722-827e-9b280a07504e', title: '', src: ['audio/track-2.mp3', 'audio/track-2.mp4', 'audio/track-2.m4a'] },
+    { code: 'Gcx2V4lbPDyMZvUh', songId: '80cf2f18-caf9-4f7a-a16a-2eab9a8f1e55', title: '', src: ['audio/track-3.mp3', 'audio/track-3.mp4', 'audio/track-3.m4a'] },
   ],
 };
 
@@ -823,7 +823,7 @@ const Engine = {
   _set(s) { this.status = s; emit('state', s); },
   get cur() { return this.tracks[this.index]; },
   /* where a song can come from, in order: a dropped file, the repo file, Suno's CDN */
-  sources(t) { return [t.blobUrl, t.src, t.songId ? `https://cdn1.suno.ai/${t.songId}.mp3` : ''].filter(Boolean); },
+  sources(t) { return [t.blobUrl, ...[].concat(t.src || []), t.songId ? `https://cdn1.suno.ai/${t.songId}.mp3` : ''].filter(Boolean); },
   srcOf(t) { return this.sources(t)[t.alt || 0] || ''; },
   /* current source is unusable — move on to the next one; false when none are left */
   nextSource(t) {
