@@ -1209,12 +1209,15 @@ attribute float aPh;    // phase
 uniform vec2 uRes; uniform vec2 uC; uniform float uR; uniform float uArc; uniform float uProg;
 uniform float uTime; uniform vec3 uW; uniform vec4 uAud; uniform float uBeat;
 uniform vec2 uRot; uniform vec3 uMouse; uniform float uPx; uniform float uAlpha;
+uniform float uDark;   // 0 on a light page, 1 on a dark one — eased, so the dust re-tones slowly
 varying vec4 vCol;
 const vec3 CLAY = vec3(0.878, 0.129, 0.478);
 const vec3 INKD = vec3(0.086, 0.078, 0.071);
 const vec3 BONE = vec3(0.93, 0.9, 0.86);
 const vec3 GRAY = vec3(0.55, 0.52, 0.48);
 const vec3 SKY = vec3(0.52, 0.6, 1.0);
+const vec3 BLUE = vec3(0.145, 0.192, 0.812);
+const vec3 ASH = vec3(0.68, 0.66, 0.62);
 void main() {
   float u = aP.x, a = aP.y, b = aP.z, z = aP.w, t = uTime;
   float th = u * uArc * 6.28318;
@@ -1237,10 +1240,11 @@ void main() {
   if (dl < mr) pix += dm / (dl + 0.001) * pow(1.0 - dl / mr, 2.0) * mr * 0.5 * uMouse.z;
   gl_Position = vec4(pix.x / uRes.x * 2.0 - 1.0, 1.0 - pix.y / uRes.y * 2.0, 0.0, 1.0);
   float played = step(u, uProg);
-  vec3 cP = CLAY * uW.x + BONE * (uW.y + uW.z);
-  vec3 cU = INKD * uW.x + GRAY * uW.y + SKY * uW.z;
+  // played dust keeps the state colour; the rest is toned against whatever the page is now
+  vec3 cP = CLAY * uW.x + mix(INKD, BONE, uDark) * uW.y + mix(BLUE, BONE, uDark) * uW.z;
+  vec3 cU = mix(INKD, ASH, uDark) * uW.x + mix(vec3(0.45, 0.43, 0.4), GRAY, uDark) * uW.y + mix(vec3(0.42, 0.48, 0.95), SKY, uDark) * uW.z;
   float twinkle = mix(1.0, 0.65 + 0.35 * sin(t * 4.0 + aPh * 7.0), uW.y);
-  vCol = vec4(mix(cU, cP, played), (0.35 + 0.65 * z) * mix(0.5 + 0.25 * uW.y, 1.0, played) * twinkle * uAlpha);
+  vCol = vec4(mix(cU, cP, played), (0.35 + 0.65 * z) * mix(0.5 + 0.25 * uW.y + 0.15 * uDark * uW.x, 1.0, played) * twinkle * uAlpha);
   gl_PointSize = (1.3 + z * 1.9) * uPx * persp * (1.0 + uAud.w * 0.4);
 }`;
 const DUST_FRAG = `
@@ -1253,7 +1257,7 @@ void main() {
 
 const Orb = {
   target: POSES.desk.hero, pose: [.3, .02, .82], arc: 0, prog: 1, introOn: false, intro: 0,
-  w: [1, 0, 0], spinX: 0, spinY: 0, vx: 0, vy: 0, drag: null, mouse: 0, q: 1, slow: 0,
+  w: [1, 0, 0], spinX: 0, spinY: 0, vx: 0, vy: 0, drag: null, mouse: 0, q: 1, slow: 0, dark: 0,
   init() {
     this.cv = $('#gl');
     this.count = mqFine.matches ? 16000 : 9000;
@@ -1293,7 +1297,7 @@ const Orb = {
     gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 4, gl.FLOAT, false, 20, 0);
     gl.enableVertexAttribArray(aPh); gl.vertexAttribPointer(aPh, 1, gl.FLOAT, false, 20, 16);
     this.u = {};
-    ['uRes', 'uC', 'uR', 'uArc', 'uProg', 'uTime', 'uW', 'uAud', 'uBeat', 'uRot', 'uMouse', 'uPx', 'uAlpha'].forEach(n => { this.u[n] = gl.getUniformLocation(pr, n); });
+    ['uRes', 'uC', 'uR', 'uArc', 'uProg', 'uTime', 'uW', 'uAud', 'uBeat', 'uRot', 'uMouse', 'uPx', 'uAlpha', 'uDark'].forEach(n => { this.u[n] = gl.getUniformLocation(pr, n); });
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
@@ -1339,6 +1343,9 @@ const Orb = {
     for (let k = 0; k < 3; k++) this.pose[k] = damp(this.pose[k], this.target[k], 4.5, dt);
     const sw = STATES[Theme.state].w;
     for (let k = 0; k < 3; k++) this.w[k] = damp(this.w[k], sw[k], 3.2, dt);
+    // how dark the page currently is — eased slower than the background for a filmic re-tone
+    const [br, bg, bb] = hexRgb(Theme.colors().bg);
+    this.dark = damp(this.dark, (.2126 * br + .7152 * bg + .0722 * bb) / 255 < .4 ? 1 : 0, 1.4, dt);
     // the song paints the stroke as it plays; the circle closes at the very end
     const scrub = States.scrubRatio;
     const begun = Engine.begun || scrub != null;
@@ -1383,6 +1390,7 @@ const Orb = {
     gl.uniform3f(u.uMouse, Pointer.sx * k, Pointer.sy * k, this.mouse);
     gl.uniform1f(u.uPx, k * Math.max(.75, Math.min(1.15, this.pose[2] / .62)));
     gl.uniform1f(u.uAlpha, alpha);
+    gl.uniform1f(u.uDark, this.dark);
     gl.drawArrays(gl.POINTS, 0, this.count);
   },
   /* fallback without WebGL: the same dust, fewer particles, flat */
@@ -1392,8 +1400,9 @@ const Orb = {
     c.clearRect(0, 0, W, H);
     if (alpha <= 0) return;
     const R = s.r * .8 * k, cx = s.x * k, cy = s.y * k, tilt = Math.cos(rx);
-    const played = this.w[0] > .5 ? '224,33,122' : '237,230,219';
-    const rest = this.w[0] > .5 ? '22,20,18' : this.w[1] > .5 ? '92,87,80' : '133,153,255';
+    const dk = this.dark > .5;
+    const played = this.w[0] > .5 ? '224,33,122' : dk ? '237,230,219' : this.w[1] > .5 ? '22,20,18' : '37,49,207';
+    const rest = this.w[0] > .5 ? (dk ? '153,148,140' : '22,20,18') : this.w[1] > .5 ? (dk ? '140,133,122' : '115,110,102') : (dk ? '133,153,255' : '107,122,242');
     for (let i = 0; i < this.count; i++) {
       const u = D[i * 5], a = D[i * 5 + 1], z = D[i * 5 + 3];
       const th = u * this.arc * TAU, w = (1.15 - .8 * Math.pow(u, 1.2)) * R * .16 * (1 + Engine.level * 1.1);
