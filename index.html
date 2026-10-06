@@ -8,6 +8,17 @@
 <meta name="theme-color" content="#E9E3D8">
 <meta property="og:title" content="Enso — AI Music Artist">
 <meta property="og:description" content="Three songs, three states of one open circle. Listen on Suno.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://miroslav300812-creator.github.io/musport/">
+<meta property="og:image" content="https://miroslav300812-creator.github.io/musport/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ENSO — a pink ensō of dust over oversized black type">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Enso — AI Music Artist">
+<meta name="twitter:description" content="Three songs, three states of one open circle.">
+<meta name="twitter:image" content="https://miroslav300812-creator.github.io/musport/og.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23E9E3D8'/%3E%3Cpath d='M41 14A20 20 0 1 1 27 13' fill='none' stroke='%23E0217A' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -334,6 +345,20 @@ html.has-cursor .cursor { display: block; }
 @media (hover: none), (pointer: coarse) { .orb-hit { touch-action: pan-y; } }
 .orb-hit:focus-visible { outline-offset: -2px; }
 
+/* lyrics — sung inside the circle */
+.lyric { position: fixed; z-index: 2; left: 0; top: 0; display: grid; place-items: center; text-align: center; pointer-events: none; opacity: 0; transition: opacity .8s var(--e-out); }
+.lyric.is-on { opacity: 1; }
+.lyric__line { grid-area: 1 / 1; max-width: 100%; font: 400 clamp(20px, 2.35vw, 42px)/1.1 var(--f-s); font-style: italic; letter-spacing: -.01em; text-wrap: balance; }
+.lyric__line .lw { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 .04em .12em; margin-bottom: -.12em; }
+.lyric__line .lw > span { display: inline-block; transform: translateY(110%); opacity: .3; transition: transform 1s var(--e-out), opacity .45s; transition-delay: calc(var(--i) * 45ms), 0s; }
+.lyric__line.is-in .lw > span { transform: none; }
+.lyric__line .lw > span.is-sung { opacity: 1; }
+.lyric__line.is-out { animation: lyric-out .7s var(--e-io) forwards; }
+@keyframes lyric-out { to { opacity: 0; transform: translateY(-18px); filter: blur(8px); } }
+.stitle { transition: opacity 1s var(--e-out); }
+.states.has-lyric .stitle { opacity: .28; }
+@media (max-width: 760px) { .lyric__line { font-size: clamp(17px, 4.8vw, 24px); } }
+
 /* ==========================================================================
    Listen on Suno — inverted
    ========================================================================== */
@@ -562,6 +587,7 @@ body.menu-open .now { opacity: 0; }
       <div class="pside">
         <span class="step"><button type="button" data-dir="-1" aria-label="Previous song" data-cursor="link"><svg aria-hidden="true"><use href="#i-prev"/></svg></button><button type="button" data-dir="1" aria-label="Next song" data-cursor="link"><svg aria-hidden="true"><use href="#i-next"/></svg></button></span>
         <span class="vol" id="vol" role="slider" tabindex="0" aria-label="Volume — drag sideways, click to mute" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85" data-cursor="label" data-cursor-label="drag">Vol <b id="vol-n">85</b></span>
+        <button class="ul" id="p-share" type="button" data-cursor="link">Share</button>
         <a class="ul" id="p-suno" href="#" target="_blank" rel="noopener" data-cursor="link">Open on Suno <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
         <span class="pnote" id="p-note"></span>
       </div>
@@ -1487,6 +1513,10 @@ const Loader = {
     this.active = false;
     Engine.unlock();
     scrollTo(0, 0);
+    if (Link.pending >= 0) {
+      Engine.select(Link.pending, true);
+      setTimeout(() => $('#tracks').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' }), reduced() ? 50 : 1400);
+    }
     this.el.classList.add('is-leaving');
     document.body.classList.remove('is-locked');
     setTimeout(() => { document.documentElement.classList.add('is-entered'); Orb.introOn = true; }, reduced() ? 0 : 350);
@@ -2044,6 +2074,105 @@ function initDrop() {
 }
 
 /* ==========================================================================
+   Lyrics — the current line, sung inside the circle
+   ========================================================================== */
+const Lyrics = {
+  cur: null, track: -1,
+  init() {
+    this.el = document.createElement('div');
+    this.el.className = 'lyric';
+    this.el.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(this.el);
+    this.sec = $('#tracks');
+    Ticker.add(() => this.frame());
+  },
+  lineAt(L, time) {
+    let k = -1;
+    for (let i = 0; i < L.length; i++) { if (L[i][0] <= time + .12) k = i; else break; }
+    return k;
+  },
+  frame() {
+    const t = Engine.cur, L = t.lyrics;
+    const on = !!L && Scroll.active === 'tracks' && Engine.begun && !Menu.open;
+    let k = on ? this.lineAt(L, Engine.time) : -1;
+    if (k >= 0 && !L[k][1]) k = -1;
+    const key = k < 0 ? null : t.i + ':' + k;
+    if (key !== this.cur) { this.cur = key; this.show(k >= 0 ? L[k][1] : ''); }
+    const has = !!this.line;
+    this.el.classList.toggle('is-on', on && has);
+    this.sec.classList.toggle('has-lyric', on && has);
+    if (!on) return;
+    const s = Orb.screen, w = s.r * 1.12;
+    this.el.style.width = w + 'px';
+    this.el.style.height = (s.r * 1.2) + 'px';
+    this.el.style.transform = `translate3d(${(s.x - w / 2).toFixed(1)}px,${(s.y - s.r * .6).toFixed(1)}px,0)`;
+    if (this.line && k >= 0) {
+      const start = L[k][0], end = k + 1 < L.length ? L[k + 1][0] : start + 4;
+      const p = clamp((Engine.time - start) / Math.max(.5, (end - start) * .85));
+      const n = this.words.length;
+      this.words.forEach((wd, j) => wd.classList.toggle('is-sung', j < Math.ceil(p * n + .01)));
+    }
+  },
+  show(text) {
+    if (this.line) {
+      const old = this.line;
+      old.classList.add('is-out');
+      setTimeout(() => old.remove(), 750);
+      this.line = null; this.words = [];
+    }
+    if (!text) return;
+    const line = document.createElement('p');
+    line.className = 'lyric__line';
+    this.words = text.split(/\s+/).map((w, i) => {
+      const m = document.createElement('span'); m.className = 'lw';
+      const sp = document.createElement('span'); sp.textContent = w; sp.style.setProperty('--i', i);
+      m.appendChild(sp); line.appendChild(m); line.appendChild(document.createTextNode(' '));
+      return sp;
+    });
+    this.el.appendChild(line);
+    this.line = line;
+    requestAnimationFrame(() => requestAnimationFrame(() => line.classList.add('is-in')));
+  },
+};
+
+/* ==========================================================================
+   Deep links — enso/#spring opens straight on that song and its state
+   ========================================================================== */
+const slugOf = t => Engine.titleOf(t).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `track-${t.i + 1}`;
+const Link = {
+  pending: -1,
+  find(hash) {
+    let h = (hash || '').replace(/^#/, '');
+    try { h = decodeURIComponent(h).toLowerCase(); } catch { h = h.toLowerCase(); }
+    if (!h) return -1;
+    return Engine.tracks.findIndex(t => slugOf(t) === h || `track-${t.i + 1}` === h);
+  },
+  url(t) { return location.origin + location.pathname + '#' + slugOf(t); },
+  write() { if (Engine.started || Engine.index > 0) history.replaceState(null, '', '#' + slugOf(Engine.cur)); },
+  init() {
+    this.pending = this.find(location.hash);
+    if (this.pending > 0) Engine.select(this.pending, false); // its state is already set behind the loader
+    on('track', () => this.write());
+    on('state', st => { if (st === 'playing') this.write(); });
+    addEventListener('hashchange', () => {
+      const i = this.find(location.hash);
+      if (i < 0 || Loader.active) return;
+      States.go(i, null, true);
+      $('#tracks').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' });
+    });
+    $('#p-share').addEventListener('click', () => this.share());
+  },
+  async share() {
+    const t = Engine.cur, url = this.url(t), title = `${Engine.titleOf(t)} — Enso`;
+    if (navigator.share) {
+      try { await navigator.share({ title, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    try { await navigator.clipboard.writeText(url); Toast.show(`Link copied — it opens straight on ${Engine.titleOf(t)}`); }
+    catch { Toast.show(url, 6000); }
+  },
+};
+
+/* ==========================================================================
    Boot
    ========================================================================== */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -2058,6 +2187,8 @@ States.init();
 Listen.init();
 Chrome.init();
 Menu.init();
+Lyrics.init();
+Link.init();
 initKeys();
 initDrop();
 Loader.init();
