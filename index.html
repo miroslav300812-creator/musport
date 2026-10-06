@@ -634,17 +634,18 @@ body.menu-open .now { opacity: 0; }
 /* ==========================================================================
    CONFIG
    --------------------------------------------------------------------------
-   songId : the Suno song UUID — audio streams from Suno's CDN; the title is
-            read from the MP3's own tags when the browser is allowed to.
-   title  : set it to override the displayed name ('' = automatic).
-   src    : optional direct audio URL / local file, used instead of songId.
+   src    : the audio file inside this repository (audio/track-1.mp3 …).
+            Played first — upload the MP3s from Suno into the audio/ folder.
+   songId : the Suno song UUID — fallback: streams from Suno's CDN if the
+            local file is missing. Also used for the cover art.
+   title  : set it to override the displayed name ('' = read from the MP3).
    ========================================================================== */
 const CONFIG = {
   sunoProfile: 'https://suno.com/@ensomusicrecords74?page=songs',
   tracks: [
-    { code: 'FlUHU56FcRSXQtcj', songId: '06ebbe47-8539-4eea-916f-7017b690b90d', title: '', src: '' },
-    { code: 'Rkw3YUjjzWxiJ3Lj', songId: '303f09a5-e35c-4722-827e-9b280a07504e', title: '', src: '' },
-    { code: 'Gcx2V4lbPDyMZvUh', songId: '80cf2f18-caf9-4f7a-a16a-2eab9a8f1e55', title: '', src: '' },
+    { code: 'FlUHU56FcRSXQtcj', songId: '06ebbe47-8539-4eea-916f-7017b690b90d', title: '', src: 'audio/track-1.mp3' },
+    { code: 'Rkw3YUjjzWxiJ3Lj', songId: '303f09a5-e35c-4722-827e-9b280a07504e', title: '', src: 'audio/track-2.mp3' },
+    { code: 'Gcx2V4lbPDyMZvUh', songId: '80cf2f18-caf9-4f7a-a16a-2eab9a8f1e55', title: '', src: 'audio/track-3.mp3' },
   ],
 };
 
@@ -821,7 +822,16 @@ const Engine = {
   },
   _set(s) { this.status = s; emit('state', s); },
   get cur() { return this.tracks[this.index]; },
-  srcOf(t) { return t.blobUrl || t.src || (t.songId ? `https://cdn1.suno.ai/${t.songId}.mp3` : ''); },
+  /* where a song can come from, in order: a dropped file, the repo file, Suno's CDN */
+  sources(t) { return [t.blobUrl, t.src, t.songId ? `https://cdn1.suno.ai/${t.songId}.mp3` : ''].filter(Boolean); },
+  srcOf(t) { return this.sources(t)[t.alt || 0] || ''; },
+  /* current source is unusable — move on to the next one; false when none are left */
+  nextSource(t) {
+    if ((t.alt || 0) + 1 >= this.sources(t).length) return false;
+    t.alt = (t.alt || 0) + 1;
+    Object.assign(t, { plainOnly: false, peaks: null, peaksKind: '', peaksTried: false, tagTried: false });
+    return true;
+  },
   coverOf(t) { return t.coverBlob || (t.songId ? `https://cdn2.suno.ai/image_${t.songId}.jpeg` : ''); },
   titleOf(t) { return t.title || t.metaTitle || `Track ${pad(t.i + 1)}`; },
   has(i) { const t = this.tracks[i]; return !!this.srcOf(t) && !t.failed; },
@@ -877,6 +887,7 @@ const Engine = {
     const t = this.tracks[this.loaded];
     if (!t) return;
     if (a === this.elG && !t.plainOnly) { t.plainOnly = true; this._attach(t, this.wantPlay); return; }
+    if (this.nextSource(t)) { this._attach(t, this.wantPlay); if (t.i === this.index) this.decodePeaks(t); return; }
     t.failed = true; this.wantPlay = false; this._set('error');
     emit('toast', `${this.titleOf(t)} couldn't be loaded here — it's still on Suno`);
     emit('source', t);
@@ -1033,7 +1044,7 @@ const Engine = {
     const t = this.tracks[i];
     if (t.blobUrl) URL.revokeObjectURL(t.blobUrl);
     if (t.coverBlob) URL.revokeObjectURL(t.coverBlob);
-    Object.assign(t, { blobUrl: URL.createObjectURL(file), coverBlob: '', fileName: file.name, failed: false, plainOnly: false, peaks: null, peaksKind: '', peaksTried: true, duration: NaN });
+    Object.assign(t, { alt: 0, blobUrl: URL.createObjectURL(file), coverBlob: '', fileName: file.name, failed: false, plainOnly: false, peaks: null, peaksKind: '', peaksTried: true, duration: NaN });
     let buf = null;
     try { buf = await file.arrayBuffer(); } catch { /* unreadable */ }
     if (buf) {
@@ -1054,7 +1065,13 @@ const Engine = {
       a.preload = 'metadata';
       const done = () => { a.removeAttribute('src'); a.load(); };
       a.addEventListener('loadedmetadata', () => { if (isFinite(a.duration)) { t.duration = a.duration; emit('meta', t); } done(); }, { once: true });
-      a.addEventListener('error', () => { if (a.getAttribute('src')) { t.failed = true; emit('source', t); } done(); }, { once: true });
+      a.addEventListener('error', () => {
+        if (!a.getAttribute('src')) return;
+        done();
+        if (this.loaded === i) return; // the main player handles its own fallbacks
+        if (this.nextSource(t)) { a.src = this.srcOf(t); a.load(); return; }
+        t.failed = true; emit('source', t);
+      });
       a.src = this.srcOf(t);
     });
   },
